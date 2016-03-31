@@ -1,0 +1,9 @@
+li a {
+    color: deepskyblue;
+}
+
+body {
+    background: white url("images/background.gif") center;
+    width: 500px;
+    height: 500px;
+}
