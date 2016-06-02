@@ -1,6 +1,7 @@
 # coding:utf-8
 
 from multiprocessing import Manager, Lock, Pool, Process
+from multiprocessing.dummy import Pool as ThreadPool 
 import time, multiprocessing
 import urllib
 
@@ -13,8 +14,14 @@ def run(lock):
 
 # IO 密集型任务
 def run2(lock):
-    for j in xrange(3):
+    try:
+        urllib.urlopen('http://10.3.8.211')
+    except Exception, e:
+        pass
+    return
+    for j in xrange(50):
         try:
+            time.sleep(0.1)
             urllib.urlopen('https://www.baidu.com')
         except Exception, e:
             pass
@@ -27,13 +34,13 @@ def run2(lock):
 if __name__ == '__main__':
     f = open('2.txt', 'w')
     f.close()
-    # pool_size = multiprocessing.cpu_count()
-    # print pool_size
+    pool_size = multiprocessing.cpu_count()
+    print pool_size
     c = time.time()
 
     lock = Manager().Lock()
-    pool = Pool(processes=2)
-    for i in xrange(2):
+    pool = Pool(processes=4)
+    for i in xrange(1000):
         pool.apply_async(run2, (lock,))
         # p = Process(target=run2,args=(lock, ))
         # p.start()
@@ -42,7 +49,7 @@ if __name__ == '__main__':
     pool.join()
 
     b = time.time()
-    print b - c
+    # print b - c
 
 # lock问题
 
