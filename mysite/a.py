@@ -15,7 +15,7 @@ def run(lock):
 # IO 密集型任务
 def run2(lock):
     try:
-        urllib.urlopen('http://10.3.8.211')
+        urllib.urlopen('https://www.baidu.com')
     except Exception, e:
         pass
     return
@@ -39,8 +39,8 @@ if __name__ == '__main__':
     c = time.time()
 
     lock = Manager().Lock()
-    pool = Pool(processes=4)
-    for i in xrange(1000):
+    pool = Pool(processes=17)
+    for i in xrange(100):
         pool.apply_async(run2, (lock,))
         # p = Process(target=run2,args=(lock, ))
         # p.start()
@@ -50,26 +50,4 @@ if __name__ == '__main__':
 
     b = time.time()
     # print b - c
-
-# lock问题
-
-# from multiprocessing import Process,Lock
-# import time
-
-# def f(l,i):
-
-#     l.acquire()
-
-#     print "hello world",i
-#     time.sleep(1)
-#     l.release()
-
-
-# if __name__ == "__main__":
-
-#     lock = Lock()
-
-#     for num in range(10):
-#         Process(target=f,args=(lock,num)).start()
-
 
