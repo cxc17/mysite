@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 
 from multiprocessing import Manager, Lock, Pool, Process
 from multiprocessing.dummy import Pool as ThreadPool 
