@@ -13,8 +13,12 @@ def analyse_urls(videourl):
 
 	urls = []
 	for video in root.find('files'):
-		print video.find('quality').text
+		video_type = video.find('quality').text
+		video_urls = []
+		for video_url in video.findall('seg'):
+			video_urls.append(video_url.find('furl').text)
 
+		urls.append((video_type, video_urls))
 
 	return urls
 
@@ -29,6 +33,4 @@ def getvideolist(videourl):
 
 
 if __name__ == '__main__':
-	getvideolist('http://www.iqiyi.com/v_19rrnznots.html')
-
-
+	print getvideolist('http://tv.sohu.com/20160605/n453093612.shtml')
