@@ -1,4 +1,5 @@
 # coding: utf-8
+# 爬取所有版块的名称
 
 
 from lxml import etree
@@ -39,8 +40,9 @@ def run(session, section_url):
 			section_url = 'https://bbs.byr.cn' + board_url
 			print board_num
 			run(session, section_url)
-
+			
 	cursor.close()
+	conn.commit()
 	conn.close()
 
 
@@ -58,5 +60,3 @@ def main():
 
 if __name__ == '__main__':
 	main()
-
-# 'https://bbs.byr.cn/s/article?t1=2asdads&au=&b=notepad&_uid=oneseven'
