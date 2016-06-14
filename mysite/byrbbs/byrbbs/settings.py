@@ -7,11 +7,14 @@
 #
 #     http://doc.scrapy.org/en/latest/topics/settings.html
 #
+# LOG_LEVEL = 'CRITICAL'
 
 BOT_NAME = 'byrbbs'
 
 SPIDER_MODULES = ['byrbbs.spiders']
 NEWSPIDER_MODULE = 'byrbbs.spiders'
+
+ITEM_PIPELINES = {'byrbbs.pipelines.ByrbbsPipeline': 100}
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 # USER_AGENT = 'byrbbs (+http://www.yourdomain.com)'

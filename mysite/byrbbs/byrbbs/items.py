@@ -8,7 +8,16 @@
 import scrapy
 
 
-class ByrbbsItem(scrapy.Item):
-    # define the fields for your item here like:
+class postItem(scrapy.Item):
     # name = scrapy.Field()
-    pass
+    post_title = scrapy.Field()
+    post_url = scrapy.Field()
+    post_content = scrapy.Field()
+    author_id = scrapy.Field()
+    author_name = scrapy.Field()
+    board_name = scrapy.Field()
+    post_num = scrapy.Field()
+    post_time = scrapy.Field()
+    last_time = scrapy.Field()
+
+
