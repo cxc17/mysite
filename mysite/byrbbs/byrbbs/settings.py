@@ -7,7 +7,8 @@
 #
 #     http://doc.scrapy.org/en/latest/topics/settings.html
 #
-# LOG_LEVEL = 'CRITICAL'
+
+LOG_LEVEL = 'CRITICAL'
 
 BOT_NAME = 'byrbbs'
 

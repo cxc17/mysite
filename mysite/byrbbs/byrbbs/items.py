@@ -9,7 +9,7 @@ import scrapy
 
 
 class postItem(scrapy.Item):
-    # name = scrapy.Field()
+    type = scrapy.Field()
     post_title = scrapy.Field()
     post_url = scrapy.Field()
     post_content = scrapy.Field()
@@ -21,3 +21,10 @@ class postItem(scrapy.Item):
     last_time = scrapy.Field()
 
 
+class commentItem(scrapy.Item):
+    type = scrapy.Field()
+    comment_url = scrapy.Field()
+    comment_content = scrapy.Field()
+    commenter_id = scrapy.Field()
+    commenter_name = scrapy.Field()
+    comment_time = scrapy.Field()

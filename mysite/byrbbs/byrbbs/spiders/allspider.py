@@ -4,13 +4,14 @@ from scrapy import FormRequest
 from scrapy import Request
 from scrapy.selector import Selector
 from time import strftime, strptime, mktime, localtime
-from byrbbs.items import postItem
+from byrbbs.items import postItem, commentItem
 import re
 import json
 import MySQLdb
 
 
 class AllSpider(Spider):
+    pipelines = ['ByrbbsPipeline']
     name = "allspider"
     allowed_domains = ["bbs.byr.cn"]
     start_urls = (
@@ -33,7 +34,7 @@ class AllSpider(Spider):
             print 'ERROR!!!'
             return
 
-        conn = MySQLdb.connect(host="192.168.1.98", user="root", passwd="123456", db="byr", charset="utf8")
+        conn = MySQLdb.connect(host="127.0.0.1", user="root", passwd="123456", db="byr", charset="utf8")
         cursor = conn.cursor()
 
         # 从数据库中找出每个版块的名称
@@ -82,8 +83,8 @@ class AllSpider(Spider):
                 post_title = sel.xpath(PostTitle_xpath).extract()[0]
                 post_url = sel.xpath(PostURL_xpath).extract()[0]
                 last_time = sel.xpath(LastTime_xpath).extract()[0]
-            except Exception, e:
-                raise e
+            except:
+                return
 
             post_url = 'https://bbs.byr.cn' + post_url
 
@@ -118,6 +119,7 @@ class AllSpider(Spider):
         post_time = sel.xpath(PostTime_xpath).extract()[0]
 
         post_time = re.findall(r'\((.+?)\)', post_time)[0]
+        post_time = post_time.replace(u'\xa0\xa0', ' ')
         post_time = localtime(mktime(strptime(post_time, "%a %b %d %H:%M:%S %Y")))
         item['post_time'] = strftime('%Y-%m-%d %H:%M:%S', post_time)
 
@@ -129,10 +131,83 @@ class AllSpider(Spider):
         PostContent_xpath = '/html/body/div[3]/div[1]/table/tr[2]/td[2]/div'
         post_content = sel.xpath(PostContent_xpath).extract()[0]
 
-        post_content = re.findall(r'.+?<br>.+?<br>.+?<br>(.+?)<font class=', post_content)[0]
-        item['post_content'] = post_content.replace('<br>', '')
+        try:
+            post_content = re.findall(r'.+?<br>.+?<br>.+?<br>(.+?)<font class=', post_content)[0]
+        except:
+            post_content = re.findall(r'.+?<br>.+?<br>.+?<br>(.+)', post_content)[0]
 
-        return item
+        post_content = re.sub(r'<[\w|/].+?>', '', post_content)
+        item['post_content'] = post_content.strip('--')
+
+        item['type'] = 'post'
+        # yield item
+
+        post_num = int(item['post_num'])
+        if post_num % 10 == 0:
+            post_page = post_num / 10 + 1
+        else:
+            post_page = post_num / 10 + 2
+
+        for num in xrange(2, post_page):
+            page_url = 'https://bbs.byr.cn/article/%s/1?p=%s' % (item['board_name'], num)
+
+            yield Request(page_url,
+                          meta={'cookiejar': response.meta['cookiejar'],
+                                'comment_url': page_url,
+                                # 'post_url': post_url,
+                                # 'last_time': last_time,
+                                'board_name': response.meta['board_name']},
+                          headers={'X-Requested-With': 'XMLHttpRequest'},
+                          callback=self.comment_content)
+
+    def comment_content(self, response):
+        sel = Selector(response)
+        items = []
+
+        for num in xrange(1, 11):
+            item = commentItem()
+
+            # 作者id和用户名
+            CommenterInfo_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[2]/div/text()[1]' % num
+            try:
+                commenter_info = sel.xpath(CommenterInfo_xpath).extract()[0]
+            except:
+                return items
+
+            item['commenter_id'] = re.findall(r':(.+?)\(', commenter_info)[0]
+            item['commenter_name'] = re.findall(r'\((.+?)\)', commenter_info)[0]
+
+            # 帖子发布时间
+            CommentTime_xpath = '/html/body/div[3]/div[1]/table/tr[2]/td[2]/div/text()[3]'
+            comment_time = sel.xpath(CommentTime_xpath).extract()[0]
+
+            comment_time = re.findall(r'\((.+?)\)', comment_time)[0]
+            comment_time = comment_time.replace(u'\xa0\xa0', ' ')
+            comment_time = localtime(mktime(strptime(comment_time, "%a %b %d %H:%M:%S %Y")))
+            item['comment_time'] = strftime('%Y-%m-%d %H:%M:%S', comment_time)
+
+            # 帖子内容
+            CommentContent_xpath = '/html/body/div[3]/div[1]/table/tr[2]/td[2]/div'
+            comment_content = sel.xpath(CommentContent_xpath).extract()[0]
+
+            try:
+                comment_content = re.findall(r'.+?<br>.+?<br>.+?<br>(.+?)<font class=', comment_content)[0]
+            except:
+                comment_content = re.findall(r'.+?<br>.+?<br>.+?<br>(.+)', comment_content)[0]
+
+            comment_content = re.sub(r'<[\w|/].+?>', '', comment_content)
+            item['comment_content'] = comment_content.strip('--')
+
+            item['type'] = 'comment'
+            items.append(item)
+
+        print len(items)
+        return items
+
+
+
+
+
 
 
 
