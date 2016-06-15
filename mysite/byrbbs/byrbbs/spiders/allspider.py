@@ -8,6 +8,8 @@ from byrbbs.items import postItem, commentItem
 import re
 import json
 import MySQLdb
+import uuid
+import random
 
 
 class AllSpider(Spider):
@@ -34,7 +36,7 @@ class AllSpider(Spider):
             print 'ERROR!!!'
             return
 
-        conn = MySQLdb.connect(host="127.0.0.1", user="root", passwd="123456", db="byr", charset="utf8")
+        conn = MySQLdb.connect(host="192.168.1.98", user="root", passwd="123456", db="byr", charset="utf8")
         cursor = conn.cursor()
 
         # 从数据库中找出每个版块的名称
@@ -43,7 +45,7 @@ class AllSpider(Spider):
         cursor.execute(sql)
         for board in cursor.fetchall():
             section_url = 'https://bbs.byr.cn/board/%s' % board[0]
-            return Request(section_url,
+            yield Request(section_url,
                           meta={'board_name': board[0], 'cookiejar': response.meta['cookiejar']},
                           headers={'X-Requested-With': 'XMLHttpRequest'},
                           callback=self.board_page)
@@ -65,7 +67,7 @@ class AllSpider(Spider):
         for num in xrange(1, post_page):
             page_url = 'https://bbs.byr.cn/board/%s?p=%s' % (response.meta['board_name'], num)
 
-            return Request(page_url,
+            yield Request(page_url,
                           meta={'board_name': response.meta['board_name'], 'cookiejar': response.meta['cookiejar']},
                           headers={'X-Requested-With': 'XMLHttpRequest'},
                           callback=self.post_list)
@@ -88,7 +90,7 @@ class AllSpider(Spider):
 
             post_url = 'https://bbs.byr.cn' + post_url
 
-            return Request(post_url,
+            yield Request(post_url,
                           meta={'cookiejar': response.meta['cookiejar'],
                                 'post_title': post_title,
                                 'post_url': post_url,
@@ -102,6 +104,7 @@ class AllSpider(Spider):
         sel = Selector(response)
         item = postItem()
 
+        # 帖子信息
         item['post_title'] = response.meta['post_title']
         item['post_url'] = response.meta['post_url']
         item['last_time'] = response.meta['last_time']
@@ -111,14 +114,23 @@ class AllSpider(Spider):
         AuthorInfo_xpath = '/html/body/div[3]/div[1]/table/tr[2]/td[2]/div/text()[1]'
         author_info = sel.xpath(AuthorInfo_xpath).extract()[0]
 
-        item['author_id'] = re.findall(r':(.+?)\(', author_info)[0]
-        item['author_name'] = re.findall(r'\((.+?)\)', author_info)[0]
+        item['author_id'] = re.findall(r': (.+?) \(', author_info)[0]
+
+        try:
+            item['author_name'] = re.findall(r'\((.+?)\)', author_info)[0]
+        except:
+            item['author_name'] = ''
 
         # 帖子发布时间
-        PostTime_xpath = '/html/body/div[3]/div[1]/table/tr[2]/td[2]/div/text()[3]'
-        post_time = sel.xpath(PostTime_xpath).extract()[0]
+        try:
+            PostTime_xpath = '/html/body/div[3]/div[1]/table/tr[2]/td[2]/div//text()[3]'
+            post_time = sel.xpath(PostTime_xpath).extract()[0]
+            post_time = re.findall(r'\(([\w :]+?)\)', post_time)[0]
+        except:
+            PostTime_xpath = '/html/body/div[3]/div[1]/table/tr[2]/td[2]/div//text()[5]'
+            post_time = sel.xpath(PostTime_xpath).extract()[0]
+            post_time = re.findall(r'\(([\w :]+?)\)', post_time)[0]
 
-        post_time = re.findall(r'\((.+?)\)', post_time)[0]
         post_time = post_time.replace(u'\xa0\xa0', ' ')
         post_time = localtime(mktime(strptime(post_time, "%a %b %d %H:%M:%S %Y")))
         item['post_time'] = strftime('%Y-%m-%d %H:%M:%S', post_time)
@@ -139,23 +151,83 @@ class AllSpider(Spider):
         post_content = re.sub(r'<[\w|/].+?>', '', post_content)
         item['post_content'] = post_content.strip('--')
 
+        # item类型
         item['type'] = 'post'
-        # yield item
 
+        # 帖子id
+        item['post_id'] = ''.join(random.sample(str(uuid.uuid4()).replace('-', ''), 8))
+
+        # 返回post的item
+        yield item
+
+        # 爬取帖子首页的评论
+        for num in xrange(2, 11):
+            item_comment = commentItem()
+
+            # 作者id和用户名
+            CommenterInfo_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[2]/div/text()[1]' % num
+            try:
+                commenter_info = sel.xpath(CommenterInfo_xpath).extract()[0]
+            except:
+                break
+
+            item_comment['commenter_id'] = re.findall(r': (.+?) \(', commenter_info)[0]
+            try:
+                item_comment['commenter_name'] = re.findall(r'\((.+?)\)', commenter_info)[0]
+            except:
+                item_comment['commenter_name'] = ''
+
+            # 评论发布时间
+            try:
+                CommentTime_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[2]/div/text()[3]' % num
+                comment_time = sel.xpath(CommentTime_xpath).extract()[0]
+                comment_time = re.findall(r'\(([\w :]+?)\)', comment_time)[0]
+            except:
+                CommentTime_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[2]/div/text()[4]' % num
+                comment_time = sel.xpath(CommentTime_xpath).extract()[0]
+                comment_time = re.findall(r'\(([\w :]+?)\)', comment_time)[0]
+
+            comment_time = comment_time.replace(u'\xa0\xa0', ' ')
+            comment_time = localtime(mktime(strptime(comment_time, "%a %b %d %H:%M:%S %Y")))
+            item_comment['comment_time'] = strftime('%Y-%m-%d %H:%M:%S', comment_time)
+
+            # 评论内容
+            CommentContent_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[2]/div' % num
+            comment_content = sel.xpath(CommentContent_xpath).extract()[0]
+
+            try:
+                comment_content = re.findall(r'.+?<br>.+?<br>.+?<br>(.+?)<font class=', comment_content)[0]
+            except:
+                comment_content = re.findall(r'.+?<br>.+?<br>.+?<br>(.+)', comment_content)[0]
+
+            comment_content = re.sub(r'<[\w|/].+?>', '', comment_content)
+            item_comment['comment_content'] = comment_content.strip('--')
+
+            # item类型
+            item_comment['type'] = 'comment'
+
+            # 帖子id
+            item_comment['post_id'] = item['post_id']
+
+            # 评论url
+            item_comment['comment_url'] = item['post_url']
+
+            yield item_comment
+
+        # 判断一共有多少页评论
         post_num = int(item['post_num'])
         if post_num % 10 == 0:
             post_page = post_num / 10 + 1
         else:
             post_page = post_num / 10 + 2
 
+        # 爬取帖子首页后面的评论
         for num in xrange(2, post_page):
             page_url = 'https://bbs.byr.cn/article/%s/1?p=%s' % (item['board_name'], num)
-
             yield Request(page_url,
                           meta={'cookiejar': response.meta['cookiejar'],
                                 'comment_url': page_url,
-                                # 'post_url': post_url,
-                                # 'last_time': last_time,
+                                'post_id': item['post_id'],
                                 'board_name': response.meta['board_name']},
                           headers={'X-Requested-With': 'XMLHttpRequest'},
                           callback=self.comment_content)
@@ -172,22 +244,30 @@ class AllSpider(Spider):
             try:
                 commenter_info = sel.xpath(CommenterInfo_xpath).extract()[0]
             except:
-                return items
+                break
 
-            item['commenter_id'] = re.findall(r':(.+?)\(', commenter_info)[0]
-            item['commenter_name'] = re.findall(r'\((.+?)\)', commenter_info)[0]
+            item['commenter_id'] = re.findall(r': (.+?) \(', commenter_info)[0]
+            try:
+                item['commenter_name'] = re.findall(r'\((.+?)\)', commenter_info)[0]
+            except:
+                item['commenter_name'] = ''
 
-            # 帖子发布时间
-            CommentTime_xpath = '/html/body/div[3]/div[1]/table/tr[2]/td[2]/div/text()[3]'
-            comment_time = sel.xpath(CommentTime_xpath).extract()[0]
+            # 评论发布时间
+            try:
+                CommentTime_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[2]/div/text()[3]' % num
+                comment_time = sel.xpath(CommentTime_xpath).extract()[0]
+                comment_time = re.findall(r'\(([\w :]+?)\)', comment_time)[0]
+            except:
+                CommentTime_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[2]/div/text()[4]' % num
+                comment_time = sel.xpath(CommentTime_xpath).extract()[0]
+                comment_time = re.findall(r'\(([\w :]+?)\)', comment_time)[0]
 
-            comment_time = re.findall(r'\((.+?)\)', comment_time)[0]
             comment_time = comment_time.replace(u'\xa0\xa0', ' ')
             comment_time = localtime(mktime(strptime(comment_time, "%a %b %d %H:%M:%S %Y")))
             item['comment_time'] = strftime('%Y-%m-%d %H:%M:%S', comment_time)
 
-            # 帖子内容
-            CommentContent_xpath = '/html/body/div[3]/div[1]/table/tr[2]/td[2]/div'
+            # 评论内容
+            CommentContent_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[2]/div' % num
             comment_content = sel.xpath(CommentContent_xpath).extract()[0]
 
             try:
@@ -198,20 +278,16 @@ class AllSpider(Spider):
             comment_content = re.sub(r'<[\w|/].+?>', '', comment_content)
             item['comment_content'] = comment_content.strip('--')
 
+            # item类型
             item['type'] = 'comment'
+
+            # 帖子id
+            item['post_id'] = response.meta['post_id']
+
+            # 评论url
+            item['comment_url'] = response.meta['comment_url']
+
             items.append(item)
 
-        print len(items)
         return items
-
-
-
-
-
-
-
-
-
-
-
 

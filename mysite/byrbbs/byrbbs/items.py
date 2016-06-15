@@ -10,6 +10,7 @@ import scrapy
 
 class postItem(scrapy.Item):
     type = scrapy.Field()
+    post_id = scrapy.Field()
     post_title = scrapy.Field()
     post_url = scrapy.Field()
     post_content = scrapy.Field()
@@ -23,6 +24,7 @@ class postItem(scrapy.Item):
 
 class commentItem(scrapy.Item):
     type = scrapy.Field()
+    post_id = scrapy.Field()
     comment_url = scrapy.Field()
     comment_content = scrapy.Field()
     commenter_id = scrapy.Field()
