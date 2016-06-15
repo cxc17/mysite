@@ -6,25 +6,40 @@ from scrapy.selector import Selector
 from time import strftime, strptime, mktime, localtime
 from byrbbs.items import postItem, commentItem
 import re
+import os
 import json
 import MySQLdb
 import uuid
 import random
+import ConfigParser
 
 
 class AllSpider(Spider):
-    pipelines = ['ByrbbsPipeline']
     name = "allspider"
     allowed_domains = ["bbs.byr.cn"]
     start_urls = (
         'https://bbs.byr.cn/user/ajax_login.json',
     )
 
+    pre_path = os.getcwd()
+    pre_path = pre_path.replace('/byrbbs', '')
+    config_path = pre_path + '/byrbbs/byrbbs/spider.conf'
+
+    config = ConfigParser.ConfigParser()
+    config.read(config_path)
+    host = config.get('database', 'host')
+    user = config.get('database', 'user')
+    passwd = config.get('database', 'passwd')
+    db = config.get('database', 'db')
+
+    account_id = config.get('account_info', 'id')
+    account_passwd = config.get('account_info', 'passwd')
+
     # 登录byr论坛
     def start_requests(self):
         return [FormRequest('https://bbs.byr.cn/user/ajax_login.json',
                             meta={'cookiejar': 1},
-                            formdata={'id': 'oneseven', 'passwd': '349458cddCXC'},
+                            formdata={'id': self.account_id, 'passwd': self.account_passwd},
                             callback=self.logged_in,
                             headers={'X-Requested-With': 'XMLHttpRequest'})]
 
@@ -36,7 +51,7 @@ class AllSpider(Spider):
             print 'ERROR!!!'
             return
 
-        conn = MySQLdb.connect(host="192.168.1.98", user="root", passwd="123456", db="byr", charset="utf8")
+        conn = MySQLdb.connect(host=self.host, user=self.user, passwd=self.passwd, db=self.db, charset="utf8")
         cursor = conn.cursor()
 
         # 从数据库中找出每个版块的名称
@@ -45,7 +60,7 @@ class AllSpider(Spider):
         cursor.execute(sql)
         for board in cursor.fetchall():
             section_url = 'https://bbs.byr.cn/board/%s' % board[0]
-            yield Request(section_url,
+            return Request(section_url,
                           meta={'board_name': board[0], 'cookiejar': response.meta['cookiejar']},
                           headers={'X-Requested-With': 'XMLHttpRequest'},
                           callback=self.board_page)
@@ -94,20 +109,22 @@ class AllSpider(Spider):
                           meta={'cookiejar': response.meta['cookiejar'],
                                 'post_title': post_title,
                                 'post_url': post_url,
-                                'last_time': last_time,
+                                'last_time': response.url,
+                                'num': i,
                                 'board_name': response.meta['board_name']},
                           headers={'X-Requested-With': 'XMLHttpRequest'},
                           callback=self.post_content)
 
     # 爬取帖子的内容
     def post_content(self, response):
+        print response.meta['num'], response.meta['last_time'], response.url
+        return
         sel = Selector(response)
         item = postItem()
 
         # 帖子信息
         item['post_title'] = response.meta['post_title']
         item['post_url'] = response.meta['post_url']
-        item['last_time'] = response.meta['last_time']
         item['board_name'] = response.meta['board_name']
 
         # 作者id和用户名
@@ -137,7 +154,7 @@ class AllSpider(Spider):
 
         # 帖子总数
         PostNum_xpath = '/html/body/div[4]/div[1]/ul/li[1]/i/text()'
-        item['post_num'] = sel.xpath(PostNum_xpath).extract()[0]
+        item['post_num'] = str(int(sel.xpath(PostNum_xpath).extract()[0]) - 1)
 
         # 帖子内容
         PostContent_xpath = '/html/body/div[3]/div[1]/table/tr[2]/td[2]/div'
@@ -156,9 +173,6 @@ class AllSpider(Spider):
 
         # 帖子id
         item['post_id'] = ''.join(random.sample(str(uuid.uuid4()).replace('-', ''), 8))
-
-        # 返回post的item
-        yield item
 
         # 爬取帖子首页的评论
         for num in xrange(2, 11):
@@ -191,6 +205,9 @@ class AllSpider(Spider):
             comment_time = localtime(mktime(strptime(comment_time, "%a %b %d %H:%M:%S %Y")))
             item_comment['comment_time'] = strftime('%Y-%m-%d %H:%M:%S', comment_time)
 
+            # 帖子最新回复时间
+            item['last_time'] = item_comment['comment_time']
+
             # 评论内容
             CommentContent_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[2]/div' % num
             comment_content = sel.xpath(CommentContent_xpath).extract()[0]
@@ -215,26 +232,34 @@ class AllSpider(Spider):
             yield item_comment
 
         # 判断一共有多少页评论
-        post_num = int(item['post_num'])
-        if post_num % 10 == 0:
+        post_num = int(item['post_num']) + 1
+        if post_num == 1:
+            item['last_time'] = item['post_time']
+            yield item
+            return
+        elif post_num <= 10:
+            yield item
+            return
+        elif post_num % 10 == 0:
             post_page = post_num / 10 + 1
         else:
             post_page = post_num / 10 + 2
 
         # 爬取帖子首页后面的评论
         for num in xrange(2, post_page):
-            page_url = 'https://bbs.byr.cn/article/%s/1?p=%s' % (item['board_name'], num)
+            page_url = '%s?p=%s' % (item['post_url'], num)
             yield Request(page_url,
                           meta={'cookiejar': response.meta['cookiejar'],
                                 'comment_url': page_url,
                                 'post_id': item['post_id'],
-                                'board_name': response.meta['board_name']},
+                                'board_name': response.meta['board_name'],
+                                'item': item},
                           headers={'X-Requested-With': 'XMLHttpRequest'},
                           callback=self.comment_content)
 
     def comment_content(self, response):
         sel = Selector(response)
-        items = []
+        post_item = response.meta['item']
 
         for num in xrange(1, 11):
             item = commentItem()
@@ -244,6 +269,7 @@ class AllSpider(Spider):
             try:
                 commenter_info = sel.xpath(CommenterInfo_xpath).extract()[0]
             except:
+                yield post_item
                 break
 
             item['commenter_id'] = re.findall(r': (.+?) \(', commenter_info)[0]
@@ -278,6 +304,9 @@ class AllSpider(Spider):
             comment_content = re.sub(r'<[\w|/].+?>', '', comment_content)
             item['comment_content'] = comment_content.strip('--')
 
+            # 帖子最新回复时间
+            post_item['last_time'] = item['comment_time']
+
             # item类型
             item['type'] = 'comment'
 
@@ -287,7 +316,5 @@ class AllSpider(Spider):
             # 评论url
             item['comment_url'] = response.meta['comment_url']
 
-            items.append(item)
-
-        return items
+            yield item
 

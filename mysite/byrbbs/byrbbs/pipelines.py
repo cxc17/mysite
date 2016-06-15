@@ -2,18 +2,30 @@
 
 import MySQLdb.cursors
 from twisted.enterprise import adbapi
+import ConfigParser
+import os
 
 
 class ByrbbsPipeline(object):
-    items = []
+    pre_path = os.getcwd()
+    pre_path = pre_path.replace('/byrbbs', '')
+    config_path = pre_path + '/byrbbs/byrbbs/spider.conf'
+
+    config = ConfigParser.ConfigParser()
+    config.read(config_path)
+
+    host = config.get('database', 'host')
+    user = config.get('database', 'user')
+    passwd = config.get('database', 'passwd')
+    db = config.get('database', 'db')
 
     def __init__(self):
         self.dbpool = adbapi.ConnectionPool(
             dbapiName='MySQLdb',
-            host='192.168.1.98',
-            db='byr',
-            user='root',
-            passwd='123456',
+            host=self.host,
+            db=self.db,
+            user=self.user,
+            passwd=self.passwd,
             cursorclass=MySQLdb.cursors.DictCursor,
             charset='utf8',
             use_unicode=False
