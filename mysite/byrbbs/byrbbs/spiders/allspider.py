@@ -125,11 +125,11 @@ class AllSpider(Spider):
         try:
             PostTime_xpath = '/html/body/div[3]/div[1]/table/tr[2]/td[2]/div//text()[3]'
             post_time = sel.xpath(PostTime_xpath).extract()[0]
-            post_time = re.findall(r'\(([\w :]+?)\)', post_time)[0]
+            post_time = re.findall(r'\(([\xa0\w :]+?)\)', post_time)[0]
         except:
             PostTime_xpath = '/html/body/div[3]/div[1]/table/tr[2]/td[2]/div//text()[5]'
             post_time = sel.xpath(PostTime_xpath).extract()[0]
-            post_time = re.findall(r'\(([\w :]+?)\)', post_time)[0]
+            post_time = re.findall(r'\(([\xa0\w :]+?)\)', post_time)[0]
 
         post_time = post_time.replace(u'\xa0\xa0', ' ')
         post_time = localtime(mktime(strptime(post_time, "%a %b %d %H:%M:%S %Y")))
@@ -181,11 +181,11 @@ class AllSpider(Spider):
             try:
                 CommentTime_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[2]/div/text()[3]' % num
                 comment_time = sel.xpath(CommentTime_xpath).extract()[0]
-                comment_time = re.findall(r'\(([\w :]+?)\)', comment_time)[0]
+                comment_time = re.findall(r'\(([\xa0\w :]+?)\)', comment_time)[0]
             except:
                 CommentTime_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[2]/div/text()[4]' % num
                 comment_time = sel.xpath(CommentTime_xpath).extract()[0]
-                comment_time = re.findall(r'\(([\w :]+?)\)', comment_time)[0]
+                comment_time = re.findall(r'\(([\xa0\w :]+?)\)', comment_time)[0]
 
             comment_time = comment_time.replace(u'\xa0\xa0', ' ')
             comment_time = localtime(mktime(strptime(comment_time, "%a %b %d %H:%M:%S %Y")))
@@ -256,11 +256,11 @@ class AllSpider(Spider):
             try:
                 CommentTime_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[2]/div/text()[3]' % num
                 comment_time = sel.xpath(CommentTime_xpath).extract()[0]
-                comment_time = re.findall(r'\(([\w :]+?)\)', comment_time)[0]
+                comment_time = re.findall(r'\(([\xa0\w :]+?)\)', comment_time)[0]
             except:
                 CommentTime_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[2]/div/text()[4]' % num
                 comment_time = sel.xpath(CommentTime_xpath).extract()[0]
-                comment_time = re.findall(r'\(([\w :]+?)\)', comment_time)[0]
+                comment_time = re.findall(r'\(([\xa0\w :]+?)\)', comment_time)[0]
 
             comment_time = comment_time.replace(u'\xa0\xa0', ' ')
             comment_time = localtime(mktime(strptime(comment_time, "%a %b %d %H:%M:%S %Y")))
