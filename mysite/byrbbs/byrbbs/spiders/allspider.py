@@ -22,8 +22,13 @@ class AllSpider(Spider):
     )
 
     pre_path = os.getcwd()
-    pre_path = pre_path.replace('/byrbbs', '')
-    config_path = pre_path + '/byrbbs/byrbbs/spider.conf'
+    # linux路径
+    # pre_path = pre_path.replace('/byrbbs', '')
+    # config_path = pre_path + '/byrbbs/byrbbs/spider.conf'
+
+    # windows路径
+    pre_path = pre_path.replace('\\byrbbs', '')
+    config_path = pre_path + '\\byrbbs\\byrbbs\\spider.conf'
 
     config = ConfigParser.ConfigParser()
     config.read(config_path)
@@ -60,7 +65,7 @@ class AllSpider(Spider):
         cursor.execute(sql)
         for board in cursor.fetchall():
             section_url = 'https://bbs.byr.cn/board/%s' % board[0]
-            return Request(section_url,
+            yield Request(section_url,
                           meta={'board_name': board[0], 'cookiejar': response.meta['cookiejar']},
                           headers={'X-Requested-With': 'XMLHttpRequest'},
                           callback=self.board_page)
@@ -71,6 +76,7 @@ class AllSpider(Spider):
     # 爬取每个版块的帖子的页数
     def board_page(self, response):
         sel = Selector(response)
+
         PostNum_xpath = '/html/body/div[4]/div[1]/ul/li[1]/i/text()'
         post_num = int(sel.xpath(PostNum_xpath).extract()[0])
 
@@ -94,11 +100,13 @@ class AllSpider(Spider):
         for i in xrange(1, 31):
             PostURL_xpath = '/html/body/div[3]/table/tbody/tr[%s]/td[2]/a/@href' % i
             PostTitle_xpath = '/html/body/div[3]/table/tbody/tr[%s]/td[2]/a/text()' % i
+            AuthorID_xpath = '/html/body/div[3]/table/tbody/tr[%s]/td[4]/a/text()' % i
             LastTime_xpath = '/html/body/div[3]/table/tbody/tr[%s]/td[6]/a/text()' % i
 
             try:
                 post_title = sel.xpath(PostTitle_xpath).extract()[0]
                 post_url = sel.xpath(PostURL_xpath).extract()[0]
+                author_id = sel.xpath(AuthorID_xpath).extract()[0]
                 last_time = sel.xpath(LastTime_xpath).extract()[0]
             except:
                 return
@@ -109,16 +117,14 @@ class AllSpider(Spider):
                           meta={'cookiejar': response.meta['cookiejar'],
                                 'post_title': post_title,
                                 'post_url': post_url,
-                                'last_time': response.url,
-                                'num': i,
+                                'author_id': author_id,
+                                'last_time': last_time,
                                 'board_name': response.meta['board_name']},
                           headers={'X-Requested-With': 'XMLHttpRequest'},
                           callback=self.post_content)
 
     # 爬取帖子的内容
     def post_content(self, response):
-        print response.meta['num'], response.meta['last_time'], response.url
-        return
         sel = Selector(response)
         item = postItem()
 
@@ -127,46 +133,37 @@ class AllSpider(Spider):
         item['post_url'] = response.meta['post_url']
         item['board_name'] = response.meta['board_name']
 
-        # 作者id和用户名
-        AuthorInfo_xpath = '/html/body/div[3]/div[1]/table/tr[2]/td[2]/div/text()[1]'
-        author_info = sel.xpath(AuthorInfo_xpath).extract()[0]
-
-        item['author_id'] = re.findall(r': (.+?) \(', author_info)[0]
-
-        try:
-            item['author_name'] = re.findall(r'\((.+?)\)', author_info)[0]
-        except:
+        if response.meta['author_id'] == u'原帖已删除':
+            item['author_id'] = response.meta['author_id']
             item['author_name'] = ''
+            item['post_content'] = ''
 
-        # 帖子发布时间
-        try:
-            PostTime_xpath = '/html/body/div[3]/div[1]/table/tr[2]/td[2]/div//text()[3]'
-            post_time = sel.xpath(PostTime_xpath).extract()[0]
-            post_time = re.findall(r'\(([\xa0\w :]+?)\)', post_time)[0]
-        except:
-            PostTime_xpath = '/html/body/div[3]/div[1]/table/tr[2]/td[2]/div//text()[5]'
-            post_time = sel.xpath(PostTime_xpath).extract()[0]
-            post_time = re.findall(r'\(([\xa0\w :]+?)\)', post_time)[0]
+            comment_snum = 1
+        else:
+            # 作者id和用户名
+            AuthorInfo_xpath = '/html/body/div[3]/div[1]/table/tr[2]/td[2]/div/text()[1]'
+            author_info = sel.xpath(AuthorInfo_xpath).extract()[0]
 
-        post_time = post_time.replace(u'\xa0\xa0', ' ')
-        post_time = localtime(mktime(strptime(post_time, "%a %b %d %H:%M:%S %Y")))
-        item['post_time'] = strftime('%Y-%m-%d %H:%M:%S', post_time)
+            item['author_id'] = re.findall(r': (.+?) \(', author_info)[0]
 
-        # 帖子总数
-        PostNum_xpath = '/html/body/div[4]/div[1]/ul/li[1]/i/text()'
-        item['post_num'] = str(int(sel.xpath(PostNum_xpath).extract()[0]) - 1)
+            try:
+                item['author_name'] = re.findall(r'\((.+?)\)', author_info)[0]
+            except:
+                item['author_name'] = ''
 
-        # 帖子内容
-        PostContent_xpath = '/html/body/div[3]/div[1]/table/tr[2]/td[2]/div'
-        post_content = sel.xpath(PostContent_xpath).extract()[0]
+            # 帖子内容
+            PostContent_xpath = '/html/body/div[3]/div[1]/table/tr[2]/td[2]/div'
+            post_content = sel.xpath(PostContent_xpath).extract()[0]
 
-        try:
-            post_content = re.findall(r'.+?<br>.+?<br>.+?<br>(.+?)<font class=', post_content)[0]
-        except:
-            post_content = re.findall(r'.+?<br>.+?<br>.+?<br>(.+)', post_content)[0]
+            try:
+                post_content = re.findall(r'.+?<br>.+?<br>.+?<br>(.+?)<font class=', post_content)[0]
+            except:
+                post_content = re.findall(r'.+?<br>.+?<br>.+?<br>(.+)', post_content)[0]
 
-        post_content = re.sub(r'<[\w|/].+?>', '', post_content)
-        item['post_content'] = post_content.strip('--')
+            post_content = re.sub(r'<[\w|/].+?>', '', post_content)
+            item['post_content'] = post_content.strip('--')
+
+            comment_snum = 2
 
         # item类型
         item['type'] = 'post'
@@ -174,8 +171,38 @@ class AllSpider(Spider):
         # 帖子id
         item['post_id'] = ''.join(random.sample(str(uuid.uuid4()).replace('-', ''), 8))
 
+        # 跟帖数量
+        try:
+            PostNum_xpath = '/html/body/div[4]/div[1]/ul/li[1]/i/text()'
+            item['post_num'] = str(int(sel.xpath(PostNum_xpath).extract()[0]) - 1)
+        except:
+            item['post_num'] = '0'
+            item['post_time'] = response.meta['last_time']
+            item['last_time'] = response.meta['last_time']
+            yield item
+            return
+
+        # 帖子发布时间
+        try:
+            PostTime_xpath = '/html/body/div[3]/div[1]/table/tr[2]/td[2]/div//text()[3]'
+            post_time = sel.xpath(PostTime_xpath).extract()[0]
+            post_time = re.findall(r'\(([\xa0\w :]+?)\)', post_time)[0]
+        except:
+            try:
+                PostTime_xpath = '/html/body/div[3]/div[1]/table/tr[2]/td[2]/div//text()[4]'
+                post_time = sel.xpath(PostTime_xpath).extract()[0]
+                post_time = re.findall(r'\(([\xa0\w :]+?)\)', post_time)[0]
+            except:
+                PostTime_xpath = '/html/body/div[3]/div[1]/table/tr[2]/td[2]/div//text()[5]'
+                post_time = sel.xpath(PostTime_xpath).extract()[0]
+                post_time = re.findall(r'\(([\xa0\w :]+?)\)', post_time)[0]
+
+        post_time = post_time.replace(u'\xa0\xa0', ' ')
+        post_time = localtime(mktime(strptime(post_time, "%a %b %d %H:%M:%S %Y")))
+        item['post_time'] = strftime('%Y-%m-%d %H:%M:%S', post_time)
+
         # 爬取帖子首页的评论
-        for num in xrange(2, 11):
+        for num in xrange(comment_snum, 11):
             item_comment = commentItem()
 
             # 作者id和用户名
@@ -197,9 +224,14 @@ class AllSpider(Spider):
                 comment_time = sel.xpath(CommentTime_xpath).extract()[0]
                 comment_time = re.findall(r'\(([\xa0\w :]+?)\)', comment_time)[0]
             except:
-                CommentTime_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[2]/div/text()[4]' % num
-                comment_time = sel.xpath(CommentTime_xpath).extract()[0]
-                comment_time = re.findall(r'\(([\xa0\w :]+?)\)', comment_time)[0]
+                try:
+                    CommentTime_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[2]/div/text()[4]' % num
+                    comment_time = sel.xpath(CommentTime_xpath).extract()[0]
+                    comment_time = re.findall(r'\(([\xa0\w :]+?)\)', comment_time)[0]
+                except:
+                    CommentTime_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[2]/div/text()[5]' % num
+                    comment_time = sel.xpath(CommentTime_xpath).extract()[0]
+                    comment_time = re.findall(r'\(([\xa0\w :]+?)\)', comment_time)[0]
 
             comment_time = comment_time.replace(u'\xa0\xa0', ' ')
             comment_time = localtime(mktime(strptime(comment_time, "%a %b %d %H:%M:%S %Y")))
@@ -284,9 +316,14 @@ class AllSpider(Spider):
                 comment_time = sel.xpath(CommentTime_xpath).extract()[0]
                 comment_time = re.findall(r'\(([\xa0\w :]+?)\)', comment_time)[0]
             except:
-                CommentTime_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[2]/div/text()[4]' % num
-                comment_time = sel.xpath(CommentTime_xpath).extract()[0]
-                comment_time = re.findall(r'\(([\xa0\w :]+?)\)', comment_time)[0]
+                try:
+                    CommentTime_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[2]/div/text()[4]' % num
+                    comment_time = sel.xpath(CommentTime_xpath).extract()[0]
+                    comment_time = re.findall(r'\(([\xa0\w :]+?)\)', comment_time)[0]
+                except:
+                    CommentTime_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[2]/div/text()[5]' % num
+                    comment_time = sel.xpath(CommentTime_xpath).extract()[0]
+                    comment_time = re.findall(r'\(([\xa0\w :]+?)\)', comment_time)[0]
 
             comment_time = comment_time.replace(u'\xa0\xa0', ' ')
             comment_time = localtime(mktime(strptime(comment_time, "%a %b %d %H:%M:%S %Y")))
