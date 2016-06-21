@@ -60,12 +60,13 @@ def main():
 
 if __name__ == '__main__':
 	# main()
-	req = requests.get('http://v.qq.com/x/movielist/?cate=10001&offset=0&sort=5')
+	req = requests.get('http://list.youku.com/category/show/c_97_g__a__sg__mt__lg__q__s_6_r__u_0_pt_0_av_0_ag_0_pr__h__d_1_p_1.html')
 	html = req.content
 	sel = etree.HTML(html)
-	a = sel.xpath("//*[@id='videos']/ul/li")
+	a = sel.xpath("/html/body/div[2]/div/div[2]/div[2]/ul/li")
+	print len(a)
 
-	for i in a:
-		b = i.xpath("./a/span[2]/@r-html")[0]
+	for i in a: 
+		b = i.xpath("./div/div/a/@href")[0]
 
 		print b
