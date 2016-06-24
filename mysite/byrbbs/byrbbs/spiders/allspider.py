@@ -64,7 +64,7 @@ class AllSpider(Spider):
 
         cursor.execute(sql)
         for board in cursor.fetchall():
-            section_url = 'https://bbs.byr.cn/board/%s' % board[0]
+            section_url = 'https://bbs.byr.cn/board/%s' % board[0]  # https://bbs.byr.cn/#!article/WWWTechnology/5506
             yield Request(section_url,
                           meta={'board_name': board[0], 'cookiejar': response.meta['cookiejar']},
                           headers={'X-Requested-With': 'XMLHttpRequest'},
@@ -85,7 +85,7 @@ class AllSpider(Spider):
         else:
             post_page = post_num / 30 + 2
 
-        for num in xrange(1, post_page):
+        for num in xrange(1, 11):#post_page):
             page_url = 'https://bbs.byr.cn/board/%s?p=%s' % (response.meta['board_name'], num)
 
             yield Request(page_url,
