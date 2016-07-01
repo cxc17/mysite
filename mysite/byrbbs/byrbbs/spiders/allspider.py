@@ -64,7 +64,7 @@ class AllSpider(Spider):
 
         cursor.execute(sql)
         for board in cursor.fetchall():
-            section_url = 'https://bbs.byr.cn/board/%s' % board[0]  # https://bbs.byr.cn/#!article/WWWTechnology/5506
+            section_url = 'https://bbs.byr.cn/board/%s' % board[0]
             yield Request(section_url,
                           meta={'board_name': board[0], 'cookiejar': response.meta['cookiejar']},
                           headers={'X-Requested-With': 'XMLHttpRequest'},
@@ -85,7 +85,7 @@ class AllSpider(Spider):
         else:
             post_page = post_num / 30 + 2
 
-        for num in xrange(1, 11):#post_page):
+        for num in xrange(1, post_page):
             page_url = 'https://bbs.byr.cn/board/%s?p=%s' % (response.meta['board_name'], num)
 
             yield Request(page_url,
@@ -121,10 +121,10 @@ class AllSpider(Spider):
                                 'last_time': last_time,
                                 'board_name': response.meta['board_name']},
                           headers={'X-Requested-With': 'XMLHttpRequest'},
-                          callback=self.post_content)
+                          callback=self.post_spider)
 
     # 爬取帖子的内容
-    def post_content(self, response):
+    def post_spider(self, response):
         sel = Selector(response)
         item = postItem()
 
@@ -141,24 +141,71 @@ class AllSpider(Spider):
             comment_snum = 1
         else:
             # 作者id和用户名
-            AuthorInfo_xpath = '/html/body/div[3]/div[1]/table/tr[2]/td[2]/div/text()[1]'
-            author_info = sel.xpath(AuthorInfo_xpath).extract()[0]
-
-            item['author_id'] = re.findall(r': (.+?) \(', author_info)[0]
-
             try:
-                item['author_name'] = re.findall(r'\((.+?)\)', author_info)[0]
-            except:
-                item['author_name'] = ''
+                AuthorInfo_xpath = '/html/body/div[3]/div[1]/table/tr[2]/td[2]/div/text()[1]'
+                author_info = sel.xpath(AuthorInfo_xpath).extract()[0]
 
+                item['author_id'] = re.findall(r': (.+?) \(', author_info)[0]
+
+                try:
+                    item['author_name'] = re.findall(r'\((.+?)\)', author_info)[0]
+                except:
+                    item['author_name'] = ''
+            except:
+                try:
+                    AuthorId_xpath = '/html/body/div[3]/div[1]/table/tr[1]/td[1]/span[1]/a/text()'
+                    item['author_id'] = sel.xpath(AuthorId_xpath).extract()[0]
+                except:
+                    try:
+                        AuthorId_xpath = '/html/body/div[3]/div[1]/table/tr[1]/td[1]/span[1]/text()'
+                        item['author_id'] = sel.xpath(AuthorId_xpath).extract()[0]
+                    except:
+                        return
+
+                AuthorName_xpath = '/html/body/div[3]/div[1]/table/tr[2]/td[1]/div[2]/text()'
+                try:
+                    item['author_name'] = sel.xpath(AuthorName_xpath).extract()[0]
+                except:
+                    item['author_name'] = ''
             # 帖子内容
-            PostContent_xpath = '/html/body/div[3]/div[1]/table/tr[2]/td[2]/div'
-            post_content = sel.xpath(PostContent_xpath).extract()[0]
-
             try:
-                post_content = re.findall(r'.+?<br>.+?<br>.+?<br>(.+?)<font class=', post_content)[0]
+                PostContent_xpath = '/html/body/div[3]/div[1]/table/tr[2]/td[2]/div'
+                post_content = sel.xpath(PostContent_xpath).extract()[0]
             except:
-                post_content = re.findall(r'.+?<br>.+?<br>.+?<br>(.+)', post_content)[0]
+                try:
+                    post_content = re.findall(r'<td class="a-content">(.+?)</td>', response.body.decode('gbk'), re.DOTALL)[0]
+                except:
+                    try:
+                        post_content = re.findall(r'<td class="a-content">(.+?)</td>', response.body, re.DOTALL)[0].decode('gbk')
+                    except:
+                        post_content = re.findall(r'<td class="a-content">(.+?)</td>', response.body, re.DOTALL)[0]
+
+            if re.findall(r'<br>', post_content, re.DOTALL):
+                try:
+                    post_content = re.findall(r'.+?<br>.+?<br>.+?<br>(.+)', post_content, re.DOTALL)[0]
+                except:
+                    pass
+
+            post_content2 = post_content[0:10000]
+
+            if re.findall(r'<font class=', post_content2, re.DOTALL):
+                try:
+                    post_content = re.findall(r'(.+?)<font class=', post_content2, re.DOTALL)[0]
+                except:
+                    pass
+            else:
+                post_content = post_content[0:65535]
+                if re.findall(r'<font class=', post_content, re.DOTALL):
+                    try:
+                        post_content = re.findall(r'(.+?)<font class=', post_content, re.DOTALL)[0]
+                    except:
+                        pass
+                else:
+                    try:
+                        post_content = re.findall(r'(.+?)</div>', post_content, re.DOTALL)[0]
+                    except:
+                        pass
+
 
             post_content = re.sub(r'<[\w|/].+?>', '', post_content)
             item['post_content'] = post_content.strip('--')
@@ -171,83 +218,140 @@ class AllSpider(Spider):
         # 帖子id
         item['post_id'] = ''.join(random.sample(str(uuid.uuid4()).replace('-', ''), 8))
 
+        # 初始最后跟帖时间
+        item['last_time'] = response.meta['last_time']
+
         # 跟帖数量
         try:
-            PostNum_xpath = '/html/body/div[4]/div[1]/ul/li[1]/i/text()'
+            PostNum_xpath = '/html/body/div[1]/div[1]/ul/li[1]/i/text()'
             item['post_num'] = str(int(sel.xpath(PostNum_xpath).extract()[0]) - 1)
         except:
-            item['post_num'] = '0'
-            item['post_time'] = response.meta['last_time']
-            item['last_time'] = response.meta['last_time']
-            yield item
-            return
+            try:
+                PostNum_xpath = '/html/body/div[4]/div[1]/ul/li[1]/i/text()'
+                item['post_num'] = str(int(sel.xpath(PostNum_xpath).extract()[0]) - 1)
+            except:
+                item['post_num'] = '0'
+                item['post_time'] = response.meta['last_time']
+                yield item
+                return
 
         # 帖子发布时间
         try:
-            PostTime_xpath = '/html/body/div[3]/div[1]/table/tr[2]/td[2]/div//text()[3]'
-            post_time = sel.xpath(PostTime_xpath).extract()[0]
-            post_time = re.findall(r'\(([\xa0\w :]+?)\)', post_time)[0]
-        except:
             try:
-                PostTime_xpath = '/html/body/div[3]/div[1]/table/tr[2]/td[2]/div//text()[4]'
+                PostTime_xpath = '/html/body/div[3]/div[1]/table/tr[2]/td[2]/div//text()[3]'
                 post_time = sel.xpath(PostTime_xpath).extract()[0]
-                post_time = re.findall(r'\(([\xa0\w :]+?)\)', post_time)[0]
+                post_time = re.findall(r'\(([\xa0\w :]+?:[\xa0\w :]+?)\)', post_time)[0]
             except:
-                PostTime_xpath = '/html/body/div[3]/div[1]/table/tr[2]/td[2]/div//text()[5]'
-                post_time = sel.xpath(PostTime_xpath).extract()[0]
-                post_time = re.findall(r'\(([\xa0\w :]+?)\)', post_time)[0]
+                try:
+                    PostTime_xpath = '/html/body/div[3]/div[1]/table/tr[2]/td[2]/div//text()[4]'
+                    post_time = sel.xpath(PostTime_xpath).extract()[0]
+                    post_time = re.findall(r'\(([\xa0\w :]+?:[\xa0\w :]+?)\)', post_time)[0]
+                except:
+                    PostTime_xpath = '/html/body/div[3]/div[1]/table/tr[2]/td[2]/div//text()[5]'
+                    post_time = sel.xpath(PostTime_xpath).extract()[0]
+                    post_time = re.findall(r'\(([\xa0\w :]+?:[\xa0\w :]+?)\)', post_time)[0]
 
-        post_time = post_time.replace(u'\xa0\xa0', ' ')
-        post_time = localtime(mktime(strptime(post_time, "%a %b %d %H:%M:%S %Y")))
-        item['post_time'] = strftime('%Y-%m-%d %H:%M:%S', post_time)
+            post_time = post_time.replace(u'\xa0\xa0', ' ')
+            post_time = localtime(mktime(strptime(post_time, "%a %b %d %H:%M:%S %Y")))
+            item['post_time'] = strftime('%Y-%m-%d %H:%M:%S', post_time)
+        except:
+            item['post_time'] = response.meta['last_time']
 
         # 爬取帖子首页的评论
         for num in xrange(comment_snum, 11):
             item_comment = commentItem()
 
             # 作者id和用户名
-            CommenterInfo_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[2]/div/text()[1]' % num
             try:
-                commenter_info = sel.xpath(CommenterInfo_xpath).extract()[0]
-            except:
-                break
+                CommenterInfo_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[2]/div/text()[1]' % num
 
-            item_comment['commenter_id'] = re.findall(r': (.+?) \(', commenter_info)[0]
-            try:
-                item_comment['commenter_name'] = re.findall(r'\((.+?)\)', commenter_info)[0]
+                commenter_info = sel.xpath(CommenterInfo_xpath).extract()[0]
+                item_comment['commenter_id'] = re.findall(r': (.+?) \(', commenter_info)[0]
+
+                try:
+                    item_comment['commenter_name'] = re.findall(r'\((.+?)\)', commenter_info)[0]
+                except:
+                    item_comment['commenter_name'] = ''
             except:
-                item_comment['commenter_name'] = ''
+                try:
+                    CommenterId_xpath = '/html/body/div[3]/div[%s]/table/tr[1]/td[1]/span[1]/a/text()' % num
+                    item_comment['commenter_id'] = sel.xpath(CommenterId_xpath).extract()[0]
+                except:
+                    try:
+                        CommenterId_xpath = '/html/body/div[3]/div[%s]/table/tr[1]/td[1]/span[1]/text()' % num
+                        item_comment['commenter_id'] = sel.xpath(CommenterId_xpath).extract()[0]
+                    except:
+                        break
+
+                CommenterName_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[1]/div[2]/text()' % num
+                try:
+                    item_comment['commenter_name'] = sel.xpath(CommenterName_xpath).extract()[0]
+                except:
+                    item_comment['commenter_name'] = ''
 
             # 评论发布时间
             try:
-                CommentTime_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[2]/div/text()[3]' % num
-                comment_time = sel.xpath(CommentTime_xpath).extract()[0]
-                comment_time = re.findall(r'\(([\xa0\w :]+?)\)', comment_time)[0]
-            except:
                 try:
-                    CommentTime_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[2]/div/text()[4]' % num
+                    CommentTime_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[2]/div/text()[3]' % num
                     comment_time = sel.xpath(CommentTime_xpath).extract()[0]
-                    comment_time = re.findall(r'\(([\xa0\w :]+?)\)', comment_time)[0]
+                    comment_time = re.findall(r'\(([\xa0\w :]+?:[\xa0\w :]+?)\)', comment_time)[0]
                 except:
-                    CommentTime_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[2]/div/text()[5]' % num
-                    comment_time = sel.xpath(CommentTime_xpath).extract()[0]
-                    comment_time = re.findall(r'\(([\xa0\w :]+?)\)', comment_time)[0]
+                    try:
+                        CommentTime_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[2]/div/text()[4]' % num
+                        comment_time = sel.xpath(CommentTime_xpath).extract()[0]
+                        comment_time = re.findall(r'\(([\xa0\w :]+?:[\xa0\w :]+?)\)', comment_time)[0]
+                    except:
+                        CommentTime_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[2]/div/text()[5]' % num
+                        comment_time = sel.xpath(CommentTime_xpath).extract()[0]
+                        comment_time = re.findall(r'\(([\xa0\w :]+?:[\xa0\w :]+?)\)', comment_time)[0]
 
-            comment_time = comment_time.replace(u'\xa0\xa0', ' ')
-            comment_time = localtime(mktime(strptime(comment_time, "%a %b %d %H:%M:%S %Y")))
-            item_comment['comment_time'] = strftime('%Y-%m-%d %H:%M:%S', comment_time)
+                comment_time = comment_time.replace(u'\xa0\xa0', ' ')
+                comment_time = localtime(mktime(strptime(comment_time, "%a %b %d %H:%M:%S %Y")))
+                item_comment['comment_time'] = strftime('%Y-%m-%d %H:%M:%S', comment_time)
+            except:
+                item_comment['comment_time'] = response.meta['last_time']
 
             # 帖子最新回复时间
             item['last_time'] = item_comment['comment_time']
 
             # 评论内容
-            CommentContent_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[2]/div' % num
-            comment_content = sel.xpath(CommentContent_xpath).extract()[0]
-
             try:
-                comment_content = re.findall(r'.+?<br>.+?<br>.+?<br>(.+?)<font class=', comment_content)[0]
+                CommentContent_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[2]/div' % num
+                comment_content = sel.xpath(CommentContent_xpath).extract()[0]
             except:
-                comment_content = re.findall(r'.+?<br>.+?<br>.+?<br>(.+)', comment_content)[0]
+                try:
+                    comment_content = re.findall(r'<td class="a-content">(.+?)</td>', response.body.decode('gbk'), re.DOTALL)[num-1]
+                except:
+                    try:
+                        comment_content = re.findall(r'<td class="a-content">(.+?)</td>', response.body, re.DOTALL)[num-1].decode('gbk')
+                    except:
+                        comment_content = re.findall(r'<td class="a-content">(.+?)</td>', response.body, re.DOTALL)[num-1]
+
+            if re.findall(r'<br>', comment_content, re.DOTALL):
+                try:
+                    comment_content = re.findall(r'.+?<br>.+?<br>.+?<br>(.+)', comment_content, re.DOTALL)[0]
+                except:
+                    pass
+
+            comment_content2 = comment_content[0:10000]
+
+            if re.findall(r'<font class=', comment_content2, re.DOTALL):
+                try:
+                    comment_content = re.findall(r'(.+?)<font class=', comment_content2, re.DOTALL)[0]
+                except:
+                    pass
+            else:
+                comment_content = comment_content[0:65535]
+                if re.findall(r'<font class=', comment_content, re.DOTALL):
+                    try:
+                        comment_content = re.findall(r'(.+?)<font class=', comment_content, re.DOTALL)[0]
+                    except:
+                        pass
+                else:
+                    try:
+                        comment_content = re.findall(r'(.+?)</div>', comment_content, re.DOTALL)[0]
+                    except:
+                        pass
 
             comment_content = re.sub(r'<[\w|/].+?>', '', comment_content)
             item_comment['comment_content'] = comment_content.strip('--')
@@ -285,11 +389,14 @@ class AllSpider(Spider):
                                 'comment_url': page_url,
                                 'post_id': item['post_id'],
                                 'board_name': response.meta['board_name'],
+                                'last_time': response.meta['last_time'],
+                                'post_page': post_page-1,
+                                'now_page': num,
                                 'item': item},
                           headers={'X-Requested-With': 'XMLHttpRequest'},
-                          callback=self.comment_content)
+                          callback=self.comment_spider)
 
-    def comment_content(self, response):
+    def comment_spider(self, response):
         sel = Selector(response)
         post_item = response.meta['item']
 
@@ -297,46 +404,95 @@ class AllSpider(Spider):
             item = commentItem()
 
             # 作者id和用户名
-            CommenterInfo_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[2]/div/text()[1]' % num
             try:
-                commenter_info = sel.xpath(CommenterInfo_xpath).extract()[0]
-            except:
-                yield post_item
-                break
+                CommenterInfo_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[2]/div/text()[1]' % num
 
-            item['commenter_id'] = re.findall(r': (.+?) \(', commenter_info)[0]
-            try:
-                item['commenter_name'] = re.findall(r'\((.+?)\)', commenter_info)[0]
+                commenter_info = sel.xpath(CommenterInfo_xpath).extract()[0]
+
+                item['commenter_id'] = re.findall(r': (.+?) \(', commenter_info)[0]
+
+                try:
+                    item['commenter_name'] = re.findall(r'\((.+?)\)', commenter_info)[0]
+                except:
+                    item['commenter_name'] = ''
             except:
-                item['commenter_name'] = ''
+                try:
+                    CommenterId_xpath = '/html/body/div[3]/div[%s]/table/tr[1]/td[1]/span[1]/a/text()' % num
+                    item['commenter_id'] = sel.xpath(CommenterId_xpath).extract()[0]
+                except:
+                    try:
+                        CommenterId_xpath = '/html/body/div[3]/div[%s]/table/tr[1]/td[1]/span[1]/text()' % num
+                        item['commenter_id'] = sel.xpath(CommenterId_xpath).extract()[0]
+                    except:
+                        yield post_item
+                        return
+
+                CommenterName_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[1]/div[2]/text()' % num
+                try:
+                    item['commenter_name'] = sel.xpath(CommenterName_xpath).extract()[0]
+                except:
+                    item['commenter_name'] = ''
 
             # 评论发布时间
             try:
-                CommentTime_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[2]/div/text()[3]' % num
-                comment_time = sel.xpath(CommentTime_xpath).extract()[0]
-                comment_time = re.findall(r'\(([\xa0\w :]+?)\)', comment_time)[0]
-            except:
                 try:
-                    CommentTime_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[2]/div/text()[4]' % num
+                    CommentTime_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[2]/div/text()[3]' % num
                     comment_time = sel.xpath(CommentTime_xpath).extract()[0]
-                    comment_time = re.findall(r'\(([\xa0\w :]+?)\)', comment_time)[0]
+                    comment_time = re.findall(r'\(([\xa0\w :]+?:[\xa0\w :]+?)\)', comment_time)[0]
                 except:
-                    CommentTime_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[2]/div/text()[5]' % num
-                    comment_time = sel.xpath(CommentTime_xpath).extract()[0]
-                    comment_time = re.findall(r'\(([\xa0\w :]+?)\)', comment_time)[0]
+                    try:
+                        CommentTime_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[2]/div/text()[4]' % num
+                        comment_time = sel.xpath(CommentTime_xpath).extract()[0]
+                        comment_time = re.findall(r'\(([\xa0\w :]+?:[\xa0\w :]+?)\)', comment_time)[0]
+                    except:
+                        CommentTime_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[2]/div/text()[5]' % num
+                        comment_time = sel.xpath(CommentTime_xpath).extract()[0]
+                        comment_time = re.findall(r'\(([\xa0\w :]+?:[\xa0\w :]+?)\)', comment_time)[0]
 
-            comment_time = comment_time.replace(u'\xa0\xa0', ' ')
-            comment_time = localtime(mktime(strptime(comment_time, "%a %b %d %H:%M:%S %Y")))
-            item['comment_time'] = strftime('%Y-%m-%d %H:%M:%S', comment_time)
+                comment_time = comment_time.replace(u'\xa0\xa0', ' ')
+                comment_time = localtime(mktime(strptime(comment_time, "%a %b %d %H:%M:%S %Y")))
+                item['comment_time'] = strftime('%Y-%m-%d %H:%M:%S', comment_time)
+            except:
+                item['comment_time'] = response.meta['last_time']
 
             # 评论内容
-            CommentContent_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[2]/div' % num
-            comment_content = sel.xpath(CommentContent_xpath).extract()[0]
-
             try:
-                comment_content = re.findall(r'.+?<br>.+?<br>.+?<br>(.+?)<font class=', comment_content)[0]
+                CommentContent_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[2]/div' % num
+                comment_content = sel.xpath(CommentContent_xpath).extract()[0]
             except:
-                comment_content = re.findall(r'.+?<br>.+?<br>.+?<br>(.+)', comment_content)[0]
+                try:
+                    comment_content = re.findall(r'<td class="a-content">(.+?)</td>', response.body.decode('gbk'), re.DOTALL)[num-1]
+                except:
+                    try:
+                        comment_content = re.findall(r'<td class="a-content">(.+?)</td>', response.body, re.DOTALL)[num-1].decode('gbk')
+                    except:
+                        comment_content = re.findall(r'<td class="a-content">(.+?)</td>', response.body, re.DOTALL)[num-1]
+
+            if re.findall(r'<br>', comment_content, re.DOTALL):
+                try:
+                    comment_content = re.findall(r'.+?<br>.+?<br>.+?<br>(.+)', comment_content, re.DOTALL)[0]
+                except:
+                    pass
+
+            comment_content2 = comment_content[0:10000]
+
+            if re.findall(r'<font class=', comment_content2, re.DOTALL):
+                try:
+                    comment_content = re.findall(r'(.+?)<font class=', comment_content2, re.DOTALL)[0]
+                except:
+                    pass
+            else:
+                comment_content = comment_content[0:65535]
+                if re.findall(r'<font class=', comment_content, re.DOTALL):
+                    try:
+                        comment_content = re.findall(r'(.+?)<font class=', comment_content, re.DOTALL)[0]
+                    except:
+                        pass
+                else:
+                    try:
+                        comment_content = re.findall(r'(.+?)</div>', comment_content, re.DOTALL)[0]
+                    except:
+                        pass
 
             comment_content = re.sub(r'<[\w|/].+?>', '', comment_content)
             item['comment_content'] = comment_content.strip('--')
@@ -355,3 +511,5 @@ class AllSpider(Spider):
 
             yield item
 
+        if response.meta['post_page'] == response.meta['now_page']:
+            yield post_item
