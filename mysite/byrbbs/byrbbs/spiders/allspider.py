@@ -21,14 +21,10 @@ class AllSpider(Spider):
         'https://bbs.byr.cn/user/ajax_login.json',
     )
 
-    pre_path = os.getcwd()
-    # linux路径
-    # pre_path = pre_path.replace('/byrbbs', '')
-    # config_path = pre_path + '/byrbbs/byrbbs/spider.conf'
-
-    # windows路径
-    pre_path = pre_path.replace('\\byrbbs', '')
-    config_path = pre_path + '\\byrbbs\\byrbbs\\spider.conf'
+    pre_path = os.getcwd().replace(u"\\", u"/")
+    # 配置文件路径
+    pre_path = pre_path.replace('/byrbbs', '')
+    config_path = pre_path + '/byrbbs/byrbbs/spider.conf'
 
     config = ConfigParser.ConfigParser()
     config.read(config_path)
@@ -205,7 +201,6 @@ class AllSpider(Spider):
                         post_content = re.findall(r'(.+?)</div>', post_content, re.DOTALL)[0]
                     except:
                         pass
-
 
             post_content = re.sub(r'<[\w|/].+?>', '', post_content)
             item['post_content'] = post_content.strip('--')
@@ -396,6 +391,7 @@ class AllSpider(Spider):
                           headers={'X-Requested-With': 'XMLHttpRequest'},
                           callback=self.comment_spider)
 
+    # 爬取评论内容
     def comment_spider(self, response):
         sel = Selector(response)
         post_item = response.meta['item']
