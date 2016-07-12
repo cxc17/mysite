@@ -5,13 +5,12 @@ from scrapy import Request
 from scrapy.selector import Selector
 from time import strftime, strptime, mktime, localtime
 from byrbbs.items import postItem, commentItem
+from byrbbs.mysqlclient import get_mysql
+from byrbbs.SpiderConfig import SpiderConfig
 import re
-import os
 import json
-import MySQLdb
 import uuid
 import random
-import ConfigParser
 
 
 class AllSpider(Spider):
@@ -21,26 +20,14 @@ class AllSpider(Spider):
         'https://bbs.byr.cn/user/ajax_login.json',
     )
 
-    pre_path = os.getcwd().replace(u"\\", u"/")
-    # 配置文件路径
-    pre_path = pre_path.replace('/byrbbs', '')
-    config_path = pre_path + '/byrbbs/byrbbs/spider.conf'
-
-    config = ConfigParser.ConfigParser()
-    config.read(config_path)
-    host = config.get('database', 'host')
-    user = config.get('database', 'user')
-    passwd = config.get('database', 'passwd')
-    db = config.get('database', 'db')
-
-    account_id = config.get('account_info', 'id')
-    account_passwd = config.get('account_info', 'passwd')
+    def __init__(self):
+        SpiderConfig.initialize()
 
     # 登录byr论坛
     def start_requests(self):
         return [FormRequest('https://bbs.byr.cn/user/ajax_login.json',
                             meta={'cookiejar': 1},
-                            formdata={'id': self.account_id, 'passwd': self.account_passwd},
+                            formdata={'id': SpiderConfig.account_id, 'passwd': SpiderConfig.account_passwd},
                             callback=self.logged_in,
                             headers={'X-Requested-With': 'XMLHttpRequest'})]
 
@@ -52,22 +39,18 @@ class AllSpider(Spider):
             print 'ERROR!!!'
             return
 
-        conn = MySQLdb.connect(host=self.host, user=self.user, passwd=self.passwd, db=self.db, charset="utf8")
-        cursor = conn.cursor()
-
         # 从数据库中找出每个版块的名称
         sql = "select board_name from board"
+        mh = get_mysql()
+        ret_sql = mh.select(sql)
 
-        cursor.execute(sql)
-        for board in cursor.fetchall():
-            section_url = 'https://bbs.byr.cn/board/%s' % board[0]
+        for ret in ret_sql:
+            board = ret[0]
+            section_url = 'https://bbs.byr.cn/board/%s' % board
             yield Request(section_url,
-                          meta={'board_name': board[0], 'cookiejar': response.meta['cookiejar']},
+                          meta={'board_name': board, 'cookiejar': response.meta['cookiejar']},
                           headers={'X-Requested-With': 'XMLHttpRequest'},
                           callback=self.board_page)
-
-        cursor.close()
-        conn.close()
 
     # 爬取每个版块的帖子的页数
     def board_page(self, response):

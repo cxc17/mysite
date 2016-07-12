@@ -8,12 +8,10 @@ import os
 
 
 class ByrbbsPipeline(object):
-    pre_path = os.getcwd()
-    # pre_path = pre_path.replace('/byrbbs', '')
-    # config_path = pre_path + '/byrbbs/byrbbs/spider.conf'
-
-    pre_path = pre_path.replace('\\byrbbs', '')
-    config_path = pre_path + '\\byrbbs\\byrbbs\\spider.conf'
+    pre_path = os.getcwd().replace(u"\\", u"/")
+    # 配置文件路径
+    pre_path = pre_path.replace('/byrbbs', '')
+    config_path = pre_path + '/byrbbs/byrbbs/spider.conf'
 
     config = ConfigParser.ConfigParser()
     config.read(config_path)
