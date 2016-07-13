@@ -7,6 +7,7 @@ from scrapy.selector import Selector
 from byrbbs.mysqlclient import get_mysql
 from byrbbs.SpiderConfig import SpiderConfig
 import json
+import time
 
 
 class UpdatespiderSpider(Spider):
@@ -43,7 +44,7 @@ class UpdatespiderSpider(Spider):
         for ret in ret_sql:
             board = ret[0]
             section_url = 'https://bbs.byr.cn/board/%s' % board
-            yield Request(section_url,
+            return Request(section_url,
                           meta={'board_name': board, 'cookiejar': response.meta['cookiejar']},
                           headers={'X-Requested-With': 'XMLHttpRequest'},
                           callback=self.board_page)
@@ -51,6 +52,18 @@ class UpdatespiderSpider(Spider):
     # 爬取每个版块的帖子的页数
     def board_page(self, response):
         sel = Selector(response)
+
+        sql = "SELECT `last_time` FROM post WHERE `board_name`='%s' " \
+              "ORDER BY `last_time` DESC LIMIT 1" % response.meta['board_name']
+        mh = get_mysql()
+        ret_sql = mh.select(sql)
+
+        if not ret_sql:
+            cmp_time = 0
+        else:
+            last_time = str(ret_sql[0][0])
+            time_tmp = time.strptime(last_time, "%Y-%m-%d %H:%M:%S")
+            cmp_time = int(time.mktime(time_tmp))
 
         PostNum_xpath = '/html/body/div[4]/div[1]/ul/li[1]/i/text()'
         post_num = int(sel.xpath(PostNum_xpath).extract()[0])
@@ -60,19 +73,20 @@ class UpdatespiderSpider(Spider):
         else:
             post_page = post_num / 30 + 2
 
-        for num in xrange(1, 3):#post_page):
+        for num in xrange(1, 3):  # post_page):
             page_url = 'https://bbs.byr.cn/board/%s?p=%s' % (response.meta['board_name'], num)
 
             yield Request(page_url,
-                          meta={'board_name': response.meta['board_name'], 'cookiejar': response.meta['cookiejar']},
+                          meta={'cmp_time': cmp_time,
+                                'page': num,
+                                'board_name': response.meta['board_name'],
+                                'cookiejar': response.meta['cookiejar']},
                           headers={'X-Requested-With': 'XMLHttpRequest'},
                           callback=self.post_list)
 
     # 遍历爬取所有的帖子
     def post_list(self, response):
         sel = Selector(response)
-
-        # SELECT `last_time` FROM post where `board_name`='Constellations' ORDER BY `last_time` DESC LIMIT 1
 
         for i in xrange(1, 31):
             PostURL_xpath = '/html/body/div[3]/table/tbody/tr[%s]/td[2]/a/@href' % i
@@ -88,7 +102,31 @@ class UpdatespiderSpider(Spider):
             except:
                 return
 
+            try:
+                time_tmp = time.strptime(last_time, "%Y-%m-%d")
+                cmp_time2 = int(time.mktime(time_tmp)) + 86400
+            except:
+                last_time = time.strftime('%Y-%m-%d', time.localtime(time.time())) + ' ' + last_time
+                time_tmp = time.strptime(last_time, "%Y-%m-%d %H:%M:%S")
+                cmp_time2 = int(time.mktime(time_tmp))
+
+            if cmp_time2 < response.meta['cmp_time'] and response.meta['page'] == 1:
+                continue
+            elif cmp_time2 < response.meta['cmp_time'] and response.meta['page'] > 1:
+                break
+
             post_url = 'https://bbs.byr.cn' + post_url
+
+            sql = "DELETE FROM comment WHERE `post_id`=(SELECT `post_id` FROM post2 WHERE `post_url`='%s')" % post_url
+            mh = get_mysql()
+            mh.execute(sql)
+
+
+            sql = "SELECT `last_time` FROM post WHERE `board_name`='%s' " \
+              "ORDER BY `last_time` DESC LIMIT 1" % response.meta['board_name']
+            mh = get_mysql()
+            mh.execute(sql)
+
 
             yield Request(post_url,
                           meta={'cookiejar': response.meta['cookiejar'],
@@ -102,4 +140,4 @@ class UpdatespiderSpider(Spider):
 
     # 爬取帖子的内容
     def post_spider(self, response):
-        pass
+        print response.meta['post_url']

@@ -25,3 +25,12 @@ class get_mysql(object):
             raise err
 
         return result_list
+
+    def execute(self, sql):
+        try:
+            self.__cursor.execute(sql)
+        except Exception, err:
+            raise err
+
+        return
+
