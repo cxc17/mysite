@@ -45,7 +45,7 @@ CREATE TABLE `comment` (
   KEY `commenter_id` (`commenter_id`) USING BTREE,
   KEY `commenter_name` (`commenter_name`) USING BTREE,
   KEY `comment_time` (`comment_time`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1000000 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1000001 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for post
@@ -56,7 +56,7 @@ CREATE TABLE `post` (
   `post_id` char(16) NOT NULL,
   `post_title` varchar(255) DEFAULT NULL,
   `post_url` varchar(255) DEFAULT NULL,
-  `post_content` text,
+  `post_content` mediumtext,
   `author_id` varchar(255) DEFAULT NULL,
   `author_name` varchar(255) DEFAULT NULL,
   `board_name` varchar(255) DEFAULT NULL,
@@ -74,4 +74,4 @@ CREATE TABLE `post` (
   KEY `board_name` (`board_name`) USING BTREE,
   KEY `post_num` (`post_num`) USING BTREE,
   KEY `post_time` (`post_time`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1000000 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1000001 DEFAULT CHARSET=utf8;

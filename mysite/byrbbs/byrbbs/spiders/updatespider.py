@@ -114,9 +114,9 @@ class UpdatespiderSpider(Spider):
                 time_tmp = strptime(last_time, "%Y-%m-%d %H:%M:%S")
                 cmp_time2 = int(mktime(time_tmp))
 
-            if cmp_time2 < response.meta['cmp_time'] and response.meta['page'] == 1:
+            if cmp_time2 <= response.meta['cmp_time'] and response.meta['page'] == 1:
                 continue
-            elif cmp_time2 < response.meta['cmp_time'] and response.meta['page'] > 1:
+            elif cmp_time2 <= response.meta['cmp_time'] and response.meta['page'] > 1:
                 break
 
             post_url = 'https://bbs.byr.cn' + post_url

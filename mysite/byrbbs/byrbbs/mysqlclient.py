@@ -29,7 +29,13 @@ class get_mysql(object):
     def execute(self, sql):
         try:
             self.__cursor.execute(sql)
+
+            # 没有commit调用就无法将更新语句写入数据库中
+            self.__conn.commit()
         except Exception, err:
+            # 数据库操作失败时回滚事务
+            self.__conn.rollback()
+
             raise err
 
         return
