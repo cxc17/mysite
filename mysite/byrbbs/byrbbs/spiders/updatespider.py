@@ -11,7 +11,6 @@ from byrbbs.SpiderConfig import SpiderConfig
 import re
 import json
 import uuid
-import random
 
 
 class UpdatespiderSpider(Spider):
@@ -122,7 +121,7 @@ class UpdatespiderSpider(Spider):
 
             post_url = 'https://bbs.byr.cn' + post_url
 
-            # 删除更新的原贴
+            # 删除更新的原贴和评论
             sql = "DELETE FROM comment WHERE `post_id`=(SELECT `post_id` FROM post WHERE `post_url`='%s')" % post_url
             mh = get_mysql()
             mh.execute(sql)
@@ -233,7 +232,8 @@ class UpdatespiderSpider(Spider):
         item['type'] = 'post'
 
         # 帖子id
-        item['post_id'] = ''.join(random.sample(str(uuid.uuid4()).replace('-', ''), 8))
+        post_id = str(uuid.uuid1()).split('-')
+        item['post_id'] = post_id[0] + post_id[1] + post_id[3]
 
         # 初始最后跟帖时间
         item['last_time'] = response.meta['last_time']
