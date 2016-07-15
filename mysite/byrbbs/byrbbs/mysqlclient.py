@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# coding: utf-8
 
 import MySQLdb
 from SpiderConfig import SpiderConfig

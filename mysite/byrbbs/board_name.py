@@ -20,7 +20,7 @@ def run(session, section_url):
 	html = req.content.decode("gbk")
 	sel = etree.HTML(html)
 
-	conn=MySQLdb.connect(host="127.0.0.1", user="root", passwd="123456", db="byr", charset="utf8")    
+	conn=MySQLdb.connect(host="192.168.1.98", user="root", passwd="123456", db="byr", charset="utf8")    
 	cursor = conn.cursor() 
 	sql = "insert into board (`board_name`) values ('%s')"
 

@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# coding: utf-8
 
 from scrapy import Spider
 from scrapy import FormRequest
@@ -119,6 +119,7 @@ class UpdatespiderSpider(Spider):
             elif cmp_time2 <= response.meta['cmp_time'] and response.meta['page'] > 1:
                 break
 
+            print post_url
             post_url = 'https://bbs.byr.cn' + post_url
 
             # 删除更新的原贴和评论
