@@ -7,6 +7,7 @@ from scrapy.spider import log
 from scrapy import signals
 
 from byrbbs.spiders.updatespider import UpdatespiderSpider
+from byrbbs.spiders.allspider import AllSpider
 
 import sys
 
@@ -16,6 +17,8 @@ if __name__ == '__main__':
 
     if spider_name == 'updatespider':
         spider = UpdatespiderSpider()
+    elif spider_name == 'allspider':
+        spider = AllSpider()
     else:
         print 'NO'
         exit(1)
