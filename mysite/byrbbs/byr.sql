@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50173
 File Encoding         : 65001
 
-Date: 2016-07-14 17:26:52
+Date: 2016-07-19 13:02:14
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -63,8 +63,7 @@ CREATE TABLE `post` (
   `post_num` int(11) DEFAULT NULL,
   `post_time` datetime DEFAULT NULL,
   `last_time` datetime DEFAULT NULL,
-  `insert_time` datetime DEFAULT NULL,
-  `modify_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `insert_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`,`post_id`),
   KEY `post_id` (`post_id`) USING BTREE,
   KEY `post_title` (`post_title`) USING BTREE,
@@ -73,5 +72,7 @@ CREATE TABLE `post` (
   KEY `author_name` (`author_name`) USING BTREE,
   KEY `board_name` (`board_name`) USING BTREE,
   KEY `post_num` (`post_num`) USING BTREE,
-  KEY `post_time` (`post_time`) USING BTREE
+  KEY `post_time` (`post_time`) USING BTREE,
+  KEY `last_time` (`last_time`) USING BTREE,
+  KEY `insert_time` (`insert_time`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=1000001 DEFAULT CHARSET=utf8;

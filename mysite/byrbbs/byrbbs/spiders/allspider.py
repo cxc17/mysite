@@ -403,7 +403,9 @@ class AllSpider(Spider):
                         CommenterId_xpath = '/html/body/div[3]/div[%s]/table/tr[1]/td[1]/span[1]/text()' % num
                         item['commenter_id'] = sel.xpath(CommenterId_xpath).extract()[0]
                     except:
-                        yield post_item
+                        if response.meta['post_page'] == response.meta['now_page']:
+                            yield post_item
+
                         return
 
                 CommenterName_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[1]/div[2]/text()' % num
