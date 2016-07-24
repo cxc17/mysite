@@ -539,4 +539,3 @@ class UpdatespiderSpider(Spider):
 
         if response.meta['post_page'] == response.meta['now_page']:
             yield post_item
-

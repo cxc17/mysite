@@ -17,26 +17,27 @@ class get_mysql(object):
         self.__cursor.close()
         self.__conn.close()
 
-    def select(self, sql):
+    @staticmethod
+    def select(sql):
         try:
-            self.__cursor.execute(sql)
-            result_list = self.__cursor.fetchall()
+            get_mysql.__cursor.execute(sql)
+            result_list = get_mysql.__cursor.fetchall()
         except Exception, err:
             raise err
 
         return result_list
 
-    def execute(self, sql):
+    @staticmethod
+    def execute(sql):
         try:
-            self.__cursor.execute(sql)
+            get_mysql.__cursor.execute(sql)
 
             # 没有commit调用就无法将更新语句写入数据库中
-            self.__conn.commit()
+            get_mysql.__conn.commit()
         except Exception, err:
             # 数据库操作失败时回滚事务
-            self.__conn.rollback()
+            get_mysql.__conn.rollback()
 
             raise err
 
         return
-
