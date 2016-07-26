@@ -480,7 +480,8 @@ class AllSpider(Spider):
             item['comment_content'] = comment_content.strip('--')
 
             # 帖子最新回复时间
-            post_item['last_time'] = item['comment_time']
+            if response.meta['post_page'] == response.meta['now_page']:
+                post_item['last_time'] = item['comment_time']
 
             # item类型
             item['type'] = 'comment'

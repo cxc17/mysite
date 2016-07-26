@@ -68,9 +68,9 @@ class UpdatespiderSpider(Spider):
             time_tmp = strptime(last_time, "%Y-%m-%d %H:%M:%S")
             cmp_time = int(mktime(time_tmp))
 
-        # 更新时间范围为一周的帖子，604800秒等于一周
+        # 更新时间范围为一周的帖子，604800秒等于一周, 259200秒等于3天
         now_time = int(time())
-        if cmp_time+604800 < now_time:
+        if cmp_time+259200 < now_time:
             cmp_time = now_time
 
         PostNum_xpath = '/html/body/div[4]/div[1]/ul/li[1]/i/text()'
@@ -524,7 +524,8 @@ class UpdatespiderSpider(Spider):
             item['comment_content'] = comment_content.strip('--')
 
             # 帖子最新回复时间
-            post_item['last_time'] = item['comment_time']
+            if response.meta['post_page'] == response.meta['now_page']:
+                post_item['last_time'] = item['comment_time']
 
             # item类型
             item['type'] = 'comment'
