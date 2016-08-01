@@ -9,6 +9,7 @@ gunicorn --max-requests-jitter 100 \
          --timeout 120 \
          --graceful-timeout 120 \
          --paste $DIR/paste.ini \
+         --worker-class gevent \
          --access-logfile $DIR/logs/gaccess.log \
          --error-logfile $DIR/logs/error.log \
          -n byr_client_api -D \
