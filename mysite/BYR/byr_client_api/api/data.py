@@ -4,8 +4,8 @@ import routes
 import webob
 import webob.dec
 
-from byr.common.router import ByrRouter
 from byr.common.resp import resp
+from byr.common.router import ByrRouter
 
 
 class Router(ByrRouter):
@@ -37,6 +37,9 @@ class Router(ByrRouter):
 
 
 class DataClient(object):
+    def __init__(self):
+        pass
 
-    def test(self):
+    @staticmethod
+    def test(req, match):
         return resp(1, 'param error')

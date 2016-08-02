@@ -34,5 +34,4 @@ class ByrRouter(object):
     def app_factory(cls, global_conf, **local_conf):
         conf = global_conf.copy()
         conf.update(local_conf)
-
         return cls(conf)
