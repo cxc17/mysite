@@ -17,9 +17,9 @@ gunicorn --max-requests-jitter 100 \
 
 sleep 2
 
-pid=`cat byr_client_api.pid 2>$DIR/error`
+pid=`cat byr_client_api.pid 2>/dev/null`
 
-status=`ps -ef | grep byr_client_api | grep $pid | wc -l 2>$DIR/error`
+status=`ps -ef | grep byr_client_api | grep $pid | wc -l 2>/dev/null`
 
 if [ $status -eq 5 ]; then
     echo "byr_client_api start success, pid $pid"

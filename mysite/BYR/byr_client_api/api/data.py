@@ -1,7 +1,8 @@
 # coding: utf-8
 
-import webob
 import routes
+import webob
+import webob.dec
 
 from byr.common.router import ByrRouter
 from byr.common.resp import resp
