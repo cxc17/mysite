@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50173
 File Encoding         : 65001
 
-Date: 2016-08-01 10:53:09
+Date: 2016-09-02 11:10:26
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -24,28 +24,28 @@ CREATE TABLE `board` (
   `board_name` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `board_name` (`board_name`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for comment
 -- ----------------------------
 DROP TABLE IF EXISTS `comment`;
 CREATE TABLE `comment` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `post_id` char(16) NOT NULL,
-  `comment_id` int(11) NOT NULL AUTO_INCREMENT,
   `comment_url` varchar(255) DEFAULT NULL,
   `comment_content` text,
   `commenter_id` varchar(255) DEFAULT NULL,
   `commenter_name` varchar(255) DEFAULT NULL,
   `comment_time` datetime DEFAULT NULL,
   `insert_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`comment_id`),
+  PRIMARY KEY (`id`),
   KEY `post_id` (`post_id`),
   KEY `comment_url` (`comment_url`) USING BTREE,
   KEY `commenter_id` (`commenter_id`) USING BTREE,
   KEY `commenter_name` (`commenter_name`) USING BTREE,
   KEY `comment_time` (`comment_time`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=1000001 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=10000001 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for post
@@ -75,4 +75,4 @@ CREATE TABLE `post` (
   KEY `post_time` (`post_time`) USING BTREE,
   KEY `last_time` (`last_time`) USING BTREE,
   KEY `insert_time` (`insert_time`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=1000001 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=10000001 DEFAULT CHARSET=utf8;
