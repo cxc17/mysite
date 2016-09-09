@@ -106,4 +106,4 @@ class BBSsearch(object):
         self.login(search_type, search_name)
 
 if __name__ == '__main__':
-    BBSsearch().bbssearch('name', 'xymanman')
+    BBSsearch().bbssearch('name', 'oneseven')

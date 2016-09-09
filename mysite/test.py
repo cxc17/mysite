@@ -69,3 +69,8 @@ def Export_SQL():
 if __name__ == '__main__':
 	Import_SQL()
 	# Export_SQL()
+
+
+# INSERT into user_id  (`user_id`) SELECT DISTINCT `author_id` from post WHERE author_id not in (SELECT DISTINCT `commenter_id` from `comment`)
+
+# SELECT DISTINCT user_id from user_id 
