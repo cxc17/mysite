@@ -5,12 +5,13 @@ from scrapy import FormRequest
 from scrapy import Request
 from scrapy.selector import Selector
 from time import strftime, strptime, mktime, localtime
-from byrbbs.items import postItem, commentItem
-from byrbbs.mysqlclient import get_mysql
-from byrbbs.SpiderConfig import SpiderConfig
 import re
 import json
 import uuid
+
+from byrbbs.items import postItem, commentItem
+from byrbbs.mysqlclient import get_mysql
+from byrbbs.SpiderConfig import SpiderConfig
 
 
 class AllSpider(Spider):
@@ -344,6 +345,9 @@ class AllSpider(Spider):
             # 评论url
             item_comment['comment_url'] = item['post_url']
 
+            # 帖子题目
+            item_comment['post_title'] = item['post_title']
+
             yield item_comment
 
         # 判断一共有多少页评论
@@ -367,6 +371,7 @@ class AllSpider(Spider):
                           meta={'cookiejar': response.meta['cookiejar'],
                                 'comment_url': page_url,
                                 'post_id': item['post_id'],
+                                'post_title': item['post_title'],
                                 'board_name': response.meta['board_name'],
                                 'last_time': response.meta['last_time'],
                                 'post_page': post_page-1,
@@ -491,6 +496,9 @@ class AllSpider(Spider):
 
             # 评论url
             item['comment_url'] = response.meta['comment_url']
+
+            # 帖子题目
+            item['post_title'] = response.meta['post_title']
 
             yield item
 
