@@ -6,7 +6,7 @@ from scrapy.crawler import Crawler
 from scrapy.spider import log
 from scrapy import signals
 
-from byrbbs.spiders.updatespider import UpdatespiderSpider
+from byrbbs.spiders.updatespider import UpdateSpider
 from byrbbs.spiders.allspider import AllSpider
 
 import sys
@@ -16,7 +16,7 @@ if __name__ == '__main__':
     spider_name = sys.argv[1]
 
     if spider_name == 'updatespider':
-        spider = UpdatespiderSpider()
+        spider = UpdateSpider()
     elif spider_name == 'allspider':
         spider = AllSpider()
     else:

@@ -42,10 +42,10 @@ CREATE TABLE `comment` (
   `insert_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `post_id` (`post_id`),
-  KEY `comment_url` (`comment_url`) USING BTREE,
-  KEY `commenter_id` (`commenter_id`) USING BTREE,
-  KEY `commenter_name` (`commenter_name`) USING BTREE,
-  KEY `comment_time` (`comment_time`) USING BTREE
+  KEY `url` (`url`) USING BTREE,
+  KEY `user_id` (`user_id`) USING BTREE,
+  KEY `user_name` (`user_name`) USING BTREE,
+  KEY `publish_time` (`publish_time`) USING BTREE
 ) ENGINE=MyISAM AUTO_INCREMENT=1000001 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
@@ -67,13 +67,13 @@ CREATE TABLE `post` (
   `insert_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`,`post_id`),
   KEY `post_id` (`post_id`) USING BTREE,
-  KEY `post_title` (`post_title`) USING BTREE,
-  KEY `post_url` (`post_url`) USING BTREE,
-  KEY `author_id` (`author_id`) USING BTREE,
-  KEY `author_name` (`author_name`) USING BTREE,
+  KEY `title` (`title`) USING BTREE,
+  KEY `url` (`url`) USING BTREE,
+  KEY `user_id` (`user_id`) USING BTREE,
+  KEY `user_name` (`user_name`) USING BTREE,
   KEY `board_name` (`board_name`) USING BTREE,
   KEY `post_num` (`post_num`) USING BTREE,
-  KEY `post_time` (`post_time`) USING BTREE,
+  KEY `publish_time` (`publish_time`) USING BTREE,
   KEY `last_time` (`last_time`) USING BTREE,
   KEY `insert_time` (`insert_time`) USING BTREE
 ) ENGINE=MyISAM AUTO_INCREMENT=1000001 DEFAULT CHARSET=utf8;
