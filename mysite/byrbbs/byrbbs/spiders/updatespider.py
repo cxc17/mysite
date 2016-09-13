@@ -129,11 +129,11 @@ class UpdateSpider(Spider):
             post_url = 'https://bbs.byr.cn' + post_url
 
             # 删除更新的原贴和评论
-            sql = "DELETE FROM comment WHERE `post_id`=(SELECT `post_id` FROM post WHERE `post_url`='%s')" % post_url
+            sql = "DELETE FROM comment WHERE `post_id`=(SELECT `post_id` FROM post WHERE `url`='%s')" % post_url
             mh = get_mysql()
             mh.execute(sql)
 
-            sql = "DELETE FROM post WHERE `post_url`='%s'" % post_url
+            sql = "DELETE FROM post WHERE `url`='%s'" % post_url
             mh = get_mysql()
             mh.execute(sql)
 
