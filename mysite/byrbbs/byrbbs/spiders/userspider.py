@@ -37,6 +37,17 @@ class UserSpider(Spider):
             print 'ERROR!!!'
             return
 
+        # 从comment中提取用户id数据到user_id表中
+        sql = "INSERT into user_id  (`user_id`) SELECT DISTINCT `user_id` from `comment`"
+        mh = get_mysql()
+        mh.execute(sql)
+
+        # 从post中提取用户id数据到user_id表中
+        sql = "INSERT into user_id  (`user_id`) SELECT DISTINCT `user_id` from post WHERE user_id not in " \
+              "(SELECT DISTINCT `user_id` from `comment`)"
+        mh = get_mysql()
+        mh.execute(sql)
+
         # 从数据库中找出每个版块的名称
         sql = "select user_id from user_id"
         mh = get_mysql()
@@ -44,7 +55,6 @@ class UserSpider(Spider):
 
         for ret in ret_sql:
             user_id = ret[0]
-            # user_id = "oneseven"
             user_url = 'https://bbs.byr.cn/user/query/%s.json' % user_id
             yield Request(user_url,
                           meta={'cookiejar': response.meta['cookiejar']},

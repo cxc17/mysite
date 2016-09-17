@@ -35,7 +35,4 @@ class get_mysql(object):
         except Exception, err:
             # 数据库操作失败时回滚事务
             self.__conn.rollback()
-
             raise err
-
-        return
