@@ -31,6 +31,8 @@ class commentItem(scrapy.Item):
 class userItem(scrapy.Item):
     type = scrapy.Field()
     user_id = scrapy.Field()
+    post_num = scrapy.Field()
+    comment_num = scrapy.Field()
     user_name = scrapy.Field()
     gender = scrapy.Field()
     astro = scrapy.Field()

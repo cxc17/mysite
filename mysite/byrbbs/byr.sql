@@ -41,7 +41,7 @@ CREATE TABLE `comment` (
   `publish_time` datetime DEFAULT NULL,
   `insert_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `post_id` (`post_id`),
+  KEY `post_id` (`post_id`) USING BTREE,,
   KEY `url` (`url`) USING BTREE,
   KEY `user_id` (`user_id`) USING BTREE,
   KEY `user_name` (`user_name`) USING BTREE,
@@ -101,7 +101,10 @@ CREATE TABLE `user` (
   `face_url` varchar(255) DEFAULT NULL,
   `face_height` float DEFAULT NULL,
   `face_width` float DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`) USING BTREE,
+  KEY `post_num` (`post_num`) USING BTREE,
+  KEY `comment_num` (`comment_num`) USING BTREE
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 -- ----------------------------

@@ -111,4 +111,16 @@ class UserSpider(Spider):
         except:
             item['status'] = u"目前不在站上"
 
+        # 获取用户post数目
+        sql = "select count(*) from post where `user_id`='%s'" % user_info['id']
+        mh = get_mysql()
+        ret_sql = mh.select(sql)
+        item['post_num'] = ret_sql[0][0]
+
+        # 获取用户comment数目
+        sql = "select count(*) from comment where `user_id`='%s'" % user_info['id']
+        mh = get_mysql()
+        ret_sql = mh.select(sql)
+        item['comment_num'] = ret_sql[0][0]
+
         return item
