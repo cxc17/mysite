@@ -40,6 +40,11 @@ class UpdateSpider(Spider):
             print 'ERROR!!!'
             return
 
+        # 清除user_id中的数据
+        sql = "delete from user_id"
+        mh = get_mysql()
+        mh.execute(sql)
+
         # 从数据库中找出每个版块的名称
         sql = "select board_name from board"
         mh = get_mysql()
@@ -236,7 +241,7 @@ class UpdateSpider(Spider):
             comment_snum = 2
 
         # item类型
-        item['type'] = 'post'
+        item['type'] = 'post_update'
 
         # 帖子id
         post_id = str(uuid.uuid1()).split('-')
@@ -381,7 +386,7 @@ class UpdateSpider(Spider):
             item_comment['comment_content'] = comment_content.strip('--')
 
             # item类型
-            item_comment['type'] = 'comment'
+            item_comment['type'] = 'comment_update'
 
             # 帖子id
             item_comment['post_id'] = item['post_id']
@@ -533,7 +538,7 @@ class UpdateSpider(Spider):
                 post_item['last_time'] = item['comment_time']
 
             # item类型
-            item['type'] = 'comment'
+            item['type'] = 'comment_update'
 
             # 帖子id
             item['post_id'] = response.meta['post_id']

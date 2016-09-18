@@ -37,6 +37,10 @@ class ByrbbsPipeline(object):
             self.dbpool.runInteraction(self.post_insert, item)
         elif item['type'] == 'comment':
             self.dbpool.runInteraction(self.comment_insert, item)
+        elif item['type'] == 'post_update':
+            self.dbpool.runInteraction(self.post_update_insert, item)
+        elif item['type'] == 'comment_update':
+            self.dbpool.runInteraction(self.comment_update_insert, item)
         elif item['type'] == 'user':
             self.dbpool.runInteraction(self.user_insert, item)
 
@@ -56,6 +60,27 @@ class ByrbbsPipeline(object):
 
         tx.execute(sql, (item['post_id'], item['post_title'], item['comment_url'], item['comment_content'],
                          item['commenter_id'], item['commenter_name'], item['comment_time']))
+
+    def post_update_insert(self, tx, item):
+        sql = 'INSERT INTO `post` (`post_id`, `title`, `url`, `content`, `user_id`, `user_name`, `board_name`, ' \
+              '`post_num`, `publish_time`, `last_time`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
+
+        tx.execute(sql, (item['post_id'], item['post_title'], item['post_url'], item['post_content'],
+                         item['author_id'], item['author_name'], item['board_name'], item['post_num'],
+                         item['post_time'], item['last_time']))
+
+        sql = 'INSERT INTO `user_id` (`user_id`) VALUES (%s)'
+        tx.execute(sql, (item['author_id'], ))
+
+    def comment_update_insert(self, tx, item):
+        sql = 'INSERT INTO `comment` (`post_id`, `title`, `url`, `content`, `user_id`, `user_name`, `publish_time`) ' \
+              'VALUES (%s, %s, %s, %s, %s, %s, %s)'
+
+        tx.execute(sql, (item['post_id'], item['post_title'], item['comment_url'], item['comment_content'],
+                         item['commenter_id'], item['commenter_name'], item['comment_time']))
+
+        sql = 'INSERT INTO `user_id` (`user_id`) VALUES (%s)'
+        tx.execute(sql, (item['commenter_id'], ))
 
     def user_insert(self, tx, item):
         sql = 'INSERT INTO `user` (`user_id`, `post_num`, `comment_num`,`user_name`, `gender`, `astro`, `qq`, `msn`, ' \

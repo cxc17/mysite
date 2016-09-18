@@ -11,8 +11,8 @@ from byrbbs.mysqlclient import get_mysql
 from byrbbs.SpiderConfig import SpiderConfig
 
 
-class UserSpider(Spider):
-    name = "userspider"
+class UserUpdateSpider(Spider):
+    name = "userupdate"
     allowed_domains = ["bbs.byr.cn"]
     start_urls = (
         'https://bbs.byr.cn/user/ajax_login.json',
@@ -36,24 +36,8 @@ class UserSpider(Spider):
             print 'ERROR!!!'
             return
 
-        # 从comment中提取用户id数据到user_id表中
-        sql = "INSERT into user_id  (`user_id`) SELECT DISTINCT `user_id` from `comment`"
-        mh = get_mysql()
-        mh.execute(sql)
-
-        # 从post中提取用户id数据到user_id表中
-        sql = "INSERT into user_id  (`user_id`) SELECT DISTINCT `user_id` from post WHERE user_id not in " \
-              "(SELECT DISTINCT `user_id` from `comment`)"
-        mh = get_mysql()
-        mh.execute(sql)
-
-        # 删除user里原有的数据
-        sql = "DELETE FROM user"
-        mh = get_mysql()
-        mh.execute(sql)
-
         # 从数据库中找出每个版块的名称
-        sql = "select user_id from user_id"
+        sql = "select distinct user_id from user_id"
         mh = get_mysql()
         ret_sql = mh.select(sql)
 
@@ -126,5 +110,10 @@ class UserSpider(Spider):
         mh = get_mysql()
         ret_sql = mh.select(sql)
         item['comment_num'] = ret_sql[0][0]
+
+        # 删除user里原有的user数据
+        sql = "DELETE FROM user WHERE `user_id` = '%s'" % user_info['id']
+        mh = get_mysql()
+        mh.execute(sql)
 
         return item

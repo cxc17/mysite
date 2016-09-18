@@ -5,11 +5,12 @@ from scrapy.utils.project import get_project_settings
 from scrapy.crawler import Crawler
 from scrapy.spider import log
 from scrapy import signals
+import sys
 
 from byrbbs.spiders.updatespider import UpdateSpider
 from byrbbs.spiders.allspider import AllSpider
-
-import sys
+from byrbbs.spiders.userspider import UserSpider
+from byrbbs.spiders.userupdate import UserUpdateSpider
 
 
 if __name__ == '__main__':
@@ -19,8 +20,12 @@ if __name__ == '__main__':
         spider = UpdateSpider()
     elif spider_name == 'allspider':
         spider = AllSpider()
+    elif spider_name == 'userspider':
+        spider = UserSpider()
+    elif spider_name == 'userupdate':
+        spider = UserUpdateSpider()
     else:
-        print 'NO'
+        print '输入参数有误！'
         exit(1)
 
     settings = get_project_settings()
