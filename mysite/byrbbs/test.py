@@ -14,7 +14,7 @@ class BBSsearch(object):
 
     # 以发帖人的ID或标题中的词语为关键字查找帖子
     def keyword_search(self, session):
-        for j in xrange(2, 499):
+        for j in xrange(499, 501):
             url = "https://bbs.byr.cn/article/Constellations/462125?p=%s" % j
 
             req = session.get(url, headers={'X-Requested-With': 'XMLHttpRequest'})
@@ -94,7 +94,9 @@ def deal_num():
     mh = get_mysql()
     ret_sql = mh.select(sql)
 
+    from collections import defaultdict
 
+    total = defaultdict(list)
     for ret in ret_sql:
         # if re.findall(r'\d\d\d--', ret[2]):
         #     num = re.findall(r'\d\d\d', ret[2])[0]
@@ -103,10 +105,10 @@ def deal_num():
         #     mh.execute(sql)
         
         # if re.findall(u'\d\d\d【 ', ret[2]):
-            # num = re.findall(u'(\d\d\d)【 ', ret[2])[0]
-            # sql = "update num_bbs set num='%s' where id='%s' " % (num, ret[0])
-            # mh = get_mysql()
-            # mh.execute(sql)
+        #     num = re.findall(u'(\d\d\d)【 ', ret[2])[0]
+        #     sql = "update num_bbs set num='%s' where id='%s' " % (num, ret[0])
+        #     mh = get_mysql()
+        #     mh.execute(sql)
 
         # if re.findall(r'^(\d\d\d)\D', ret[2]):
         #     num = re.findall(r'^(\d\d\d)\D', ret[2])[0]
@@ -119,9 +121,16 @@ def deal_num():
         #     sql = "update num_bbs set num='%s' where id='%s' " % (num, ret[0])
         #     mh = get_mysql()
         #     mh.execute(sql)
+        if (ret[1], ret[4]) not in total[ret[3]]:
+            total[ret[3]].append((ret[1], ret[4]))
+        # print ret[1], ret[3], ret[4]
 
-        print ret[1], ret[3], ret[4]
-
+    total = sorted(total.items(), key=lambda i:i[0])
+    
+    for i in total:
+        print i[0], "-----------------"
+        for j in i[1]:
+            print j[0], j[1]
 
 
 

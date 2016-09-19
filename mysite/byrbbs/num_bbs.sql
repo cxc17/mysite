@@ -28,7 +28,7 @@ CREATE TABLE `num_bbs` (
   `url` varchar(255) DEFAULT NULL,
   `inser_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=14822 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 --  Records of `num_bbs`
