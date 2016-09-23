@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50173
 File Encoding         : 65001
 
-Date: 2016-09-09 17:24:45
+Date: 2016-09-23 16:30:42
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -33,15 +33,15 @@ DROP TABLE IF EXISTS `comment`;
 CREATE TABLE `comment` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `post_id` char(16) NOT NULL,
-  `title` varchar(255) DEFAULT NULL,
-  `url` varchar(255) DEFAULT NULL,
+  `title` varchar(100) DEFAULT NULL,
+  `url` varchar(80) DEFAULT NULL,
   `content` text,
-  `user_id` varchar(255) DEFAULT NULL,
-  `user_name` varchar(255) DEFAULT NULL,
+  `user_id` varchar(13) DEFAULT NULL,
+  `user_name` varchar(40) DEFAULT NULL,
   `publish_time` datetime DEFAULT NULL,
   `insert_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `post_id` (`post_id`) USING BTREE,,
+  KEY `post_id` (`post_id`),
   KEY `url` (`url`) USING BTREE,
   KEY `user_id` (`user_id`) USING BTREE,
   KEY `user_name` (`user_name`) USING BTREE,
@@ -55,16 +55,16 @@ DROP TABLE IF EXISTS `post`;
 CREATE TABLE `post` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `post_id` char(16) NOT NULL,
-  `title` varchar(255) DEFAULT NULL,
-  `url` varchar(255) DEFAULT NULL,
+  `title` varchar(100) DEFAULT NULL,
+  `url` varchar(80) DEFAULT NULL,
   `content` text,
-  `user_id` varchar(255) DEFAULT NULL,
-  `user_name` varchar(255) DEFAULT NULL,
-  `board_name` varchar(255) DEFAULT NULL,
+  `user_id` varchar(13) DEFAULT NULL,
+  `user_name` varchar(40) DEFAULT NULL,
+  `board_name` varchar(30) DEFAULT NULL,
   `post_num` int(11) DEFAULT NULL,
   `publish_time` datetime DEFAULT NULL,
   `last_time` datetime DEFAULT NULL,
-  `insert_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `insert_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`,`post_id`),
   KEY `post_id` (`post_id`) USING BTREE,
   KEY `title` (`title`) USING BTREE,
@@ -117,5 +117,6 @@ DROP TABLE IF EXISTS `user_id`;
 CREATE TABLE `user_id` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` varchar(255) NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`) USING BTREE
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
