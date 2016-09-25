@@ -46,7 +46,6 @@ class WriteBoard(object):
 
         for section_num in xrange(0, 10):
             section_url = 'https://bbs.byr.cn/section/%s' % section_num
-
             self.run(session, section_url)
 
     def writeboard(self):

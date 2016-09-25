@@ -1,22 +1,24 @@
 /*
-Navicat MySQL Data Transfer
+ Navicat Premium Data Transfer
 
-Source Server         : 192.168.1.98
-Source Server Version : 50173
-Source Host           : 192.168.1.98:3306
-Source Database       : byr
+ Source Server         : localhost
+ Source Server Type    : MySQL
+ Source Server Version : 50713
+ Source Host           : localhost
+ Source Database       : byr
 
-Target Server Type    : MYSQL
-Target Server Version : 50173
-File Encoding         : 65001
+ Target Server Type    : MySQL
+ Target Server Version : 50713
+ File Encoding         : utf-8
 
-Date: 2016-09-23 16:30:42
+ Date: 09/26/2016 00:37:48 AM
 */
 
-SET FOREIGN_KEY_CHECKS=0;
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
 
 -- ----------------------------
--- Table structure for board
+--  Table structure for `board`
 -- ----------------------------
 DROP TABLE IF EXISTS `board`;
 CREATE TABLE `board` (
@@ -27,7 +29,7 @@ CREATE TABLE `board` (
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
--- Table structure for comment
+--  Table structure for `comment`
 -- ----------------------------
 DROP TABLE IF EXISTS `comment`;
 CREATE TABLE `comment` (
@@ -49,7 +51,18 @@ CREATE TABLE `comment` (
 ) ENGINE=MyISAM AUTO_INCREMENT=1000001 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
--- Table structure for post
+--  Table structure for `data`
+-- ----------------------------
+DROP TABLE IF EXISTS `data`;
+CREATE TABLE `data` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `data_name` varchar(20) NOT NULL,
+  `data_value` text NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+--  Table structure for `post`
 -- ----------------------------
 DROP TABLE IF EXISTS `post`;
 CREATE TABLE `post` (
@@ -79,28 +92,30 @@ CREATE TABLE `post` (
 ) ENGINE=MyISAM AUTO_INCREMENT=1000001 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
--- Table structure for user
+--  Table structure for `user`
 -- ----------------------------
 DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_id` varchar(255) NOT NULL,
+  `user_id` varchar(14) NOT NULL,
   `post_num` int(11) DEFAULT NULL,
   `comment_num` int(11) DEFAULT NULL,
-  `user_name` varchar(255) DEFAULT NULL,
-  `gender` varchar(255) DEFAULT NULL,
-  `astro` varchar(255) DEFAULT NULL,
-  `qq` varchar(255) DEFAULT NULL,
-  `msn` varchar(255) DEFAULT NULL,
-  `home_page` varchar(255) DEFAULT NULL,
-  `level` varchar(255) DEFAULT NULL,
+  `user_name` varchar(40) DEFAULT NULL,
+  `gender` varchar(10) DEFAULT NULL,
+  `astro` varchar(10) DEFAULT NULL,
+  `qq` varchar(100) DEFAULT NULL,
+  `msn` varchar(100) DEFAULT NULL,
+  `home_page` varchar(100) DEFAULT NULL,
+  `level` varchar(10) DEFAULT NULL,
   `post_count` int(11) DEFAULT NULL,
   `score` int(11) DEFAULT NULL,
   `life` int(11) DEFAULT NULL,
   `last_login_time` datetime DEFAULT NULL,
-  `last_login_ip` varchar(255) DEFAULT NULL,
-  `status` varchar(255) DEFAULT NULL,
-  `face_url` varchar(255) DEFAULT NULL,
+  `last_login_ip` varchar(50) DEFAULT NULL,
+  `last_login_site` varchar(20) NOT NULL,
+  `last_login_bupt` varchar(20) NOT NULL,
+  `status` varchar(30) DEFAULT NULL,
+  `face_url` varchar(80) DEFAULT NULL,
   `face_height` float DEFAULT NULL,
   `face_width` float DEFAULT NULL,
   `insert_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -111,7 +126,7 @@ CREATE TABLE `user` (
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
--- Table structure for user_id
+--  Table structure for `user_id`
 -- ----------------------------
 DROP TABLE IF EXISTS `user_id`;
 CREATE TABLE `user_id` (
@@ -120,3 +135,5 @@ CREATE TABLE `user_id` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`) USING BTREE
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+SET FOREIGN_KEY_CHECKS = 1;
