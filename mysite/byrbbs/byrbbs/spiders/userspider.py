@@ -36,6 +36,11 @@ class UserSpider(Spider):
             print 'ERROR!!!'
             return
 
+        # 删除user_id里原有的数据
+        sql = "DELETE FROM user_id"
+        mh = get_mysql()
+        mh.execute(sql)
+
         # 从comment中提取用户id数据到user_id表中
         sql = "INSERT into user_id  (`user_id`) SELECT DISTINCT `user_id` from `comment`"
         mh = get_mysql()
@@ -53,7 +58,7 @@ class UserSpider(Spider):
         mh.execute(sql)
 
         # 从数据库中找出每个版块的名称
-        sql = "select user_id from user_id"
+        sql = "select distinct user_id from user_id"
         mh = get_mysql()
         ret_sql = mh.select(sql)
 
