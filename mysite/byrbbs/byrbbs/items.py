@@ -45,6 +45,8 @@ class userItem(scrapy.Item):
     life = scrapy.Field()
     last_login_time = scrapy.Field()
     last_login_ip = scrapy.Field()
+    last_login_site = scrapy.Field()
+    last_login_bupt = scrapy.Field()
     status = scrapy.Field()
     face_url = scrapy.Field()
     face_height = scrapy.Field()

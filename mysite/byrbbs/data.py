@@ -74,7 +74,7 @@ class DealData(object):
             mh.execute(sql)
 
 if __name__ == '__main__':
-    DealData().site()
+    DealData().astro()
 
 
 # 10.8 无线网
