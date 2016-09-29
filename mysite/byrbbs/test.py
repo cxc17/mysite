@@ -211,8 +211,8 @@ for k, v in b.items():
 		a[v] = k
 
 for k, v in a.items():
-	if not v:
-		print k, v
+	if v:
+		print k + '  ' + v
 
 
 
