@@ -46,32 +46,19 @@ class DealData(object):
 
     @staticmethod
     def site():
-        sql = "select id, last_login_ip from user"
+        sql = "SELECT last_login_site, last_login_ip from `user` where last_login_site != '' and last_login_ip " \
+              "not LIKE '10\.%' and last_login_site not LIKE '%市' and last_login_site not LIKE '%省' and " \
+              "last_login_site not LIKE '%区' and last_login_site not in ('台湾', '香港', '澳门') GROUP BY " \
+              "last_login_site, last_login_ip"
         mh = get_mysql()
         ret_info = mh.select(sql)
 
         for ret in ret_info:
-            if re.findall(r'^10\.', ret[1]):
-                continue
+            
 
-            last_login_ip = ret[1].replace("*", "0")
-            url = "http://ip.zxinc.org/ipquery/?ip=%s" % last_login_ip
-            req = requests.get(url)
-            html = etree.HTML(req.content)
-            try:
-                last_login_site = html.xpath("/html/body/center/div/form[1]/table/tr[4]/td[2]/text()")[0].split(" ")[0]
-            except Exception, e:
-                raise e
-
-            if re.findall(u'省', last_login_site):
-                last_login_site = re.findall(u'(.+?省)', last_login_site)[0]
-            elif re.findall(u'市', last_login_site):
-                last_login_site = re.findall(u'(.+?市)', last_login_site)[0]
-            print last_login_site
-
-            sql = "update user set last_login_site='%s' where id='%s'" % (last_login_site, ret[0])
-            mh = get_mysql()
-            mh.execute(sql)
+        # sql = "update user set last_login_site='%s' where id='%s'" % (last_login_site, ret[0])
+        # mh = get_mysql()
+        # mh.execute(sql)
 
     @staticmethod
     def bupt_site():
@@ -94,31 +81,46 @@ class DealData(object):
             elif re.findall(r'^10\.104\.', ret[1]):
                 last_login_bupt = u"教四"
             elif re.findall(r'^10\.105\.', ret[1]):
+                last_login_bupt = u"主楼"
+            elif re.findall(r'^10\.106\.', ret[1]):
+                last_login_bupt = u"教九"
+            elif re.findall(r'^10\.107\.', ret[1]):
+                last_login_bupt = u"明光楼"
+            elif re.findall(r'^10\.108\.', ret[1]):
+                last_login_bupt = u"新科研楼"
+            elif re.findall(r'^10\.109\.', ret[1]):
+                last_login_bupt = u"新科研楼"
+            elif re.findall(r'^10\.110\.', ret[1]):
+                last_login_bupt = u"学十创新大本营"
+            elif re.findall(r'^10\.201\.', ret[1]):
+                last_login_bupt = u"学一"
+            elif re.findall(r'^10\.201\.', ret[1]):
                 last_login_bupt = u"无线网"
-            elif re.findall(r'^10\.8\.', ret[1]):
-                last_login_bupt = u"无线网"
-            elif re.findall(r'^10\.8\.', ret[1]):
-                last_login_bupt = u"无线网"
-            elif re.findall(r'^10\.8\.', ret[1]):
-                last_login_bupt = u"无线网"
-            elif re.findall(r'^10\.8\.', ret[1]):
-                last_login_bupt = u"无线网"
-            elif re.findall(r'^10\.8\.', ret[1]):
-                last_login_bupt = u"无线网"
-            elif re.findall(r'^10\.8\.', ret[1]):
-                last_login_bupt = u"无线网"
-            elif re.findall(r'^10\.8\.', ret[1]):
-                last_login_bupt = u"无线网"
-            elif re.findall(r'^10\.8\.', ret[1]):
-                last_login_bupt = u"无线网"
-            elif re.findall(r'^10\.8\.', ret[1]):
-                last_login_bupt = u"无线网"
-            elif re.findall(r'^10\.8\.', ret[1]):
-                last_login_bupt = u"无线网"
-            elif re.findall(r'^10\.8\.', ret[1]):
-                last_login_bupt = u"无线网"
-            elif re.findall(r'^10\.8\.', ret[1]):
-                last_login_bupt = u"无线网"
+            elif re.findall(r'^10\.202\.', ret[1]):
+                last_login_bupt = u"学二"
+            elif re.findall(r'^10\.203\.', ret[1]):
+                last_login_bupt = u"学三"
+            elif re.findall(r'^10\.204\.', ret[1]):
+                last_login_bupt = u"学四"
+            elif re.findall(r'^10\.205\.', ret[1]):
+                last_login_bupt = u"学五"
+            elif re.findall(r'^10\.206\.', ret[1]):
+                last_login_bupt = u"学六"
+            elif re.findall(r'^10\.208\.', ret[1]):
+                last_login_bupt = u"学八"
+            elif re.findall(r'^10\.209\.', ret[1]):
+                last_login_bupt = u"学九"
+            elif re.findall(r'^10\.210\.', ret[1]):
+                last_login_bupt = u"学十"
+            elif re.findall(r'^10\.211\.', ret[1]):
+                last_login_bupt = u"学十一"
+            elif re.findall(r'^10\.213\.', ret[1]):
+                last_login_bupt = u"学十三"
+            elif re.findall(r'^10\.215\.', ret[1]):
+                last_login_bupt = u"学二十九"
+            else:
+                last_login_bupt = u"未知"
+
 
 
 if __name__ == '__main__':

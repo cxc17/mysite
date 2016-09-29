@@ -1,24 +1,22 @@
 /*
- Navicat Premium Data Transfer
+Navicat MySQL Data Transfer
 
- Source Server         : localhost
- Source Server Type    : MySQL
- Source Server Version : 50713
- Source Host           : localhost
- Source Database       : byr
+Source Server         : 192.168.1.98
+Source Server Version : 50173
+Source Host           : 192.168.1.98:3306
+Source Database       : byr
 
- Target Server Type    : MySQL
- Target Server Version : 50713
- File Encoding         : utf-8
+Target Server Type    : MYSQL
+Target Server Version : 50173
+File Encoding         : 65001
 
- Date: 09/26/2016 00:37:48 AM
+Date: 2016-09-29 17:30:33
 */
 
-SET NAMES utf8mb4;
-SET FOREIGN_KEY_CHECKS = 0;
+SET FOREIGN_KEY_CHECKS=0;
 
 -- ----------------------------
---  Table structure for `board`
+-- Table structure for board
 -- ----------------------------
 DROP TABLE IF EXISTS `board`;
 CREATE TABLE `board` (
@@ -29,7 +27,7 @@ CREATE TABLE `board` (
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
---  Table structure for `comment`
+-- Table structure for comment
 -- ----------------------------
 DROP TABLE IF EXISTS `comment`;
 CREATE TABLE `comment` (
@@ -48,10 +46,10 @@ CREATE TABLE `comment` (
   KEY `user_id` (`user_id`) USING BTREE,
   KEY `user_name` (`user_name`) USING BTREE,
   KEY `publish_time` (`publish_time`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=1000001 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=10000000 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
---  Table structure for `data`
+-- Table structure for data
 -- ----------------------------
 DROP TABLE IF EXISTS `data`;
 CREATE TABLE `data` (
@@ -62,7 +60,7 @@ CREATE TABLE `data` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
---  Table structure for `post`
+-- Table structure for post
 -- ----------------------------
 DROP TABLE IF EXISTS `post`;
 CREATE TABLE `post` (
@@ -79,7 +77,6 @@ CREATE TABLE `post` (
   `last_time` datetime DEFAULT NULL,
   `insert_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`,`post_id`),
-  KEY `post_id` (`post_id`) USING BTREE,
   KEY `title` (`title`) USING BTREE,
   KEY `url` (`url`) USING BTREE,
   KEY `user_id` (`user_id`) USING BTREE,
@@ -88,11 +85,25 @@ CREATE TABLE `post` (
   KEY `post_num` (`post_num`) USING BTREE,
   KEY `publish_time` (`publish_time`) USING BTREE,
   KEY `last_time` (`last_time`) USING BTREE,
-  KEY `insert_time` (`insert_time`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=1000001 DEFAULT CHARSET=utf8;
+  KEY `insert_time` (`insert_time`) USING BTREE,
+  KEY `post_id` (`post_id`) USING BTREE
+) ENGINE=MyISAM AUTO_INCREMENT=1000000 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
---  Table structure for `user`
+-- Table structure for site
+-- ----------------------------
+DROP TABLE IF EXISTS `site`;
+CREATE TABLE `site` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `country_cn` varchar(50) DEFAULT NULL,
+  `country_en` varchar(50) DEFAULT NULL,
+  `province` varchar(50) DEFAULT NULL,
+  `ip` varchar(30) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for user
 -- ----------------------------
 DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user` (
@@ -126,7 +137,7 @@ CREATE TABLE `user` (
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
---  Table structure for `user_id`
+-- Table structure for user_id
 -- ----------------------------
 DROP TABLE IF EXISTS `user_id`;
 CREATE TABLE `user_id` (
@@ -135,5 +146,3 @@ CREATE TABLE `user_id` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`) USING BTREE
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
-
-SET FOREIGN_KEY_CHECKS = 1;
