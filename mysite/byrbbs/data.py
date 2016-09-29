@@ -73,8 +73,56 @@ class DealData(object):
             mh = get_mysql()
             mh.execute(sql)
 
+    @staticmethod
+    def bupt_site():
+        sql = "select id, last_login_ip from user"
+        mh = get_mysql()
+        ret_info = mh.select(sql)
+
+        for ret in ret_info:
+            if not re.findall(r'^10.\.', ret[1]):
+                continue
+
+            if re.findall(r'^10\.8\.', ret[1]):
+                last_login_bupt = u"无线网"
+            elif re.findall(r'^10\.101\.', ret[1]):
+                last_login_bupt = u"教一"
+            elif re.findall(r'^10\.102\.', ret[1]):
+                last_login_bupt = u"教二"
+            elif re.findall(r'^10\.103\.', ret[1]):
+                last_login_bupt = u"教三"
+            elif re.findall(r'^10\.104\.', ret[1]):
+                last_login_bupt = u"教四"
+            elif re.findall(r'^10\.105\.', ret[1]):
+                last_login_bupt = u"无线网"
+            elif re.findall(r'^10\.8\.', ret[1]):
+                last_login_bupt = u"无线网"
+            elif re.findall(r'^10\.8\.', ret[1]):
+                last_login_bupt = u"无线网"
+            elif re.findall(r'^10\.8\.', ret[1]):
+                last_login_bupt = u"无线网"
+            elif re.findall(r'^10\.8\.', ret[1]):
+                last_login_bupt = u"无线网"
+            elif re.findall(r'^10\.8\.', ret[1]):
+                last_login_bupt = u"无线网"
+            elif re.findall(r'^10\.8\.', ret[1]):
+                last_login_bupt = u"无线网"
+            elif re.findall(r'^10\.8\.', ret[1]):
+                last_login_bupt = u"无线网"
+            elif re.findall(r'^10\.8\.', ret[1]):
+                last_login_bupt = u"无线网"
+            elif re.findall(r'^10\.8\.', ret[1]):
+                last_login_bupt = u"无线网"
+            elif re.findall(r'^10\.8\.', ret[1]):
+                last_login_bupt = u"无线网"
+            elif re.findall(r'^10\.8\.', ret[1]):
+                last_login_bupt = u"无线网"
+            elif re.findall(r'^10\.8\.', ret[1]):
+                last_login_bupt = u"无线网"
+
+
 if __name__ == '__main__':
-    DealData().astro()
+    DealData().site()
 
 
 # 10.8 无线网

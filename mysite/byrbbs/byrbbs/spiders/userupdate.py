@@ -3,11 +3,8 @@
 from scrapy import Spider
 from scrapy import FormRequest
 from scrapy import Request
-from scrapy.selector import Selector
 from time import strftime, localtime
-import requests
 import json
-import re
 
 from byrbbs.items import userItem
 from byrbbs.mysqlclient import get_mysql
@@ -90,8 +87,6 @@ class UserUpdateSpider(Spider):
             item['last_login_time'] = ""
 
         item['last_login_ip'] = user_info['last_login_ip']
-        item['last_login_site'] = self.last_login(item['last_login_ip'])
-        item['last_login_bupt'] = ""
         item['face_url'] = user_info['face_url']
         item['face_height'] = user_info['face_height']
         item['face_width'] = user_info['face_width']
@@ -122,26 +117,3 @@ class UserUpdateSpider(Spider):
         mh.execute(sql)
 
         return item
-
-    @staticmethod
-    def last_login(last_login_ip):
-        if re.findall(r'^10\.', last_login_ip):
-            return u"北京市"
-
-        last_login_ip = last_login_ip.replace("*", "0")
-        url = "http://ip.zxinc.org/ipquery/?ip=%s" % last_login_ip
-        req = requests.get(url)
-        sel = Selector(req.content)
-
-        try:
-            last_login_site = sel.xpath("/html/body/center/div/form[1]/table/tr[4]/td[2]/text()").extract()[0].split(" ")[0]
-        except Exception, e:
-            raise e
-
-        if re.findall(u'省', last_login_site):
-            last_login_site = re.findall(u'(.+?省)', last_login_site)[0]
-        elif re.findall(u'市', last_login_site):
-            last_login_site = re.findall(u'(.+?市)', last_login_site)[0]
-
-        return last_login_site
-

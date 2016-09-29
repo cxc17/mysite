@@ -3,11 +3,8 @@
 from scrapy import Spider
 from scrapy import FormRequest
 from scrapy import Request
-from scrapy.selector import Selector
 from time import strftime, localtime
-import requests
 import json
-import re
 
 from byrbbs.items import userItem
 from byrbbs.mysqlclient import get_mysql
@@ -111,8 +108,6 @@ class UserSpider(Spider):
             item['last_login_time'] = ""
 
         item['last_login_ip'] = user_info['last_login_ip']
-        item['last_login_site'] = self.last_login(item['last_login_ip'])
-        item['last_login_bupt'] = u""
         item['face_url'] = user_info['face_url']
         item['face_height'] = user_info['face_height']
         item['face_width'] = user_info['face_width']
@@ -138,20 +133,3 @@ class UserSpider(Spider):
         item['comment_num'] = ret_sql[0][0]
 
         return item
-
-    @staticmethod
-    def last_login(last_login_ip):
-        if re.findall(r'^10\.', last_login_ip):
-            return u"北京市"
-
-        last_login_ip = last_login_ip.replace("*", "0")
-        url = "http://ip.taobao.com/service/getIpInfo.php?ip=%s" % last_login_ip
-        req = requests.get(url)
-        ip_content = json.loads(req.content)
-
-        if ip_content['code'] == -1 or ip_content['code'] == 1:
-            return u""
-        if ip_content['data']['country'] == u'中国':
-            return ip_content['data']['region']
-        else:
-            return ip_content['data']['country']
