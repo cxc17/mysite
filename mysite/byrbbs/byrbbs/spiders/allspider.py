@@ -22,7 +22,7 @@ class AllSpider(Spider):
     )
 
     def __init__(self):
-        SpiderConfig.initialize()
+        pass
 
     # 登录byr论坛
     def start_requests(self):

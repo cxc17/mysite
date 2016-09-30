@@ -4,7 +4,9 @@ from scrapy import Spider
 from scrapy import FormRequest
 from scrapy import Request
 from time import strftime, localtime
+import requests
 import json
+import re
 
 from byrbbs.items import userItem
 from byrbbs.mysqlclient import get_mysql
@@ -19,7 +21,7 @@ class UserSpider(Spider):
     )
 
     def __init__(self):
-        SpiderConfig.initialize()
+        pass
 
     # 登录byr论坛
     def start_requests(self):
@@ -108,6 +110,8 @@ class UserSpider(Spider):
             item['last_login_time'] = ""
 
         item['last_login_ip'] = user_info['last_login_ip']
+        item['last_login_site'], item['country_cn'], item['country_en'], item['province'], item['last_login_bupt'] = self.last_login(item['last_login_ip'])
+
         item['face_url'] = user_info['face_url']
         item['face_height'] = user_info['face_height']
         item['face_width'] = user_info['face_width']
@@ -133,3 +137,84 @@ class UserSpider(Spider):
         item['comment_num'] = ret_sql[0][0]
 
         return item
+
+    @staticmethod
+    def last_login(last_login_ip):
+        # 判断是否是北邮内网ip
+        if re.findall(r'^10\.', last_login_ip):
+            if re.findall(r'^10\.8\.', last_login_ip):
+                last_login_bupt = u"无线网"
+            elif re.findall(r'^10\.101\.', last_login_ip):
+                last_login_bupt = u"教一"
+            elif re.findall(r'^10\.102\.', last_login_ip):
+                last_login_bupt = u"教二"
+            elif re.findall(r'^10\.103\.', last_login_ip):
+                last_login_bupt = u"教三"
+            elif re.findall(r'^10\.104\.', last_login_ip):
+                last_login_bupt = u"教四"
+            elif re.findall(r'^10\.105\.', last_login_ip):
+                last_login_bupt = u"主楼"
+            elif re.findall(r'^10\.106\.', last_login_ip):
+                last_login_bupt = u"教九"
+            elif re.findall(r'^10\.107\.', last_login_ip):
+                last_login_bupt = u"明光楼"
+            elif re.findall(r'^10\.108\.', last_login_ip):
+                last_login_bupt = u"新科研楼"
+            elif re.findall(r'^10\.109\.', last_login_ip):
+                last_login_bupt = u"新科研楼"
+            elif re.findall(r'^10\.110\.', last_login_ip):
+                last_login_bupt = u"学十创新大本营"
+            elif re.findall(r'^10\.201\.', last_login_ip):
+                last_login_bupt = u"学一"
+            elif re.findall(r'^10\.201\.', last_login_ip):
+                last_login_bupt = u"无线网"
+            elif re.findall(r'^10\.202\.', last_login_ip):
+                last_login_bupt = u"学二"
+            elif re.findall(r'^10\.203\.', last_login_ip):
+                last_login_bupt = u"学三"
+            elif re.findall(r'^10\.204\.', last_login_ip):
+                last_login_bupt = u"学四"
+            elif re.findall(r'^10\.205\.', last_login_ip):
+                last_login_bupt = u"学五"
+            elif re.findall(r'^10\.206\.', last_login_ip):
+                last_login_bupt = u"学六"
+            elif re.findall(r'^10\.208\.', last_login_ip):
+                last_login_bupt = u"学八"
+            elif re.findall(r'^10\.209\.', last_login_ip):
+                last_login_bupt = u"学九"
+            elif re.findall(r'^10\.210\.', last_login_ip):
+                last_login_bupt = u"学十"
+            elif re.findall(r'^10\.211\.', last_login_ip):
+                last_login_bupt = u"学十一"
+            elif re.findall(r'^10\.213\.', last_login_ip):
+                last_login_bupt = u"学十三"
+            elif re.findall(r'^10\.215\.', last_login_ip):
+                last_login_bupt = u"学二十九"
+            else:
+                last_login_bupt = u"未知"
+
+            return u"北京市", u'中国', 'China', u'北京', last_login_bupt
+
+        # 从site中找出现有的ip地址
+        sql = "select * from site where ip='%s'" % last_login_ip
+        mh = get_mysql()
+        ret_sql = mh.select(sql)
+        # 判断是否是数据库中存在的ip地址
+        if ret_sql:
+            return ret_sql[0][1], ret_sql[0][2], ret_sql[0][3], ret_sql[0][4], ret_sql[0][5]
+
+        # 使用taobao的ip接口完成获取地址
+        last_login_ip = last_login_ip.replace("*", "0")
+        url = "http://ip.taobao.com/service/getIpInfo.php?ip=%s" % last_login_ip
+        req = requests.get(url)
+        try:
+            ip_content = json.loads(req.content)
+        except:
+            return "", "", "", "", ""
+
+        if ip_content['code'] == -1 or ip_content['code'] == 1:
+            return "", "", "", "", ""
+        if ip_content['data']['country'] == u'中国':
+            return ip_content['data']['region'], "", "", "", ""
+        else:
+            return ip_content['data']['country'], "", "", "", ""

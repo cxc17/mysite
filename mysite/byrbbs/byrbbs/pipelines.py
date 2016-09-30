@@ -84,11 +84,13 @@ class ByrbbsPipeline(object):
 
     def user_insert(self, tx, item):
         sql = 'INSERT INTO `user` (`user_id`, `post_num`, `comment_num`,`user_name`, `gender`, `astro`, `qq`, `msn`, ' \
-              '`home_page`, `level`, `post_count`, `score`, `life`, `last_login_time`, `last_login_ip`, `status`, ' \
+              '`home_page`, `level`, `post_count`, `score`, `life`, `last_login_time`, `last_login_ip`, ' \
+              '`last_login_site`, `country_cn`, `country_en`, `province`, `last_login_bupt`, `status`, ' \
               '`face_url`, `face_height`, `face_width`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, ' \
-              '%s, %s, %s, %s, %s, %s)'
+              '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
 
         tx.execute(sql, (item['user_id'], item['post_num'], item['comment_num'], item['user_name'], item['gender'],
                          item['astro'], item['qq'], item['msn'], item['home_page'], item['level'], item['post_count'],
-                         item['score'], item['life'], item['last_login_time'], item['last_login_ip'], item['status'],
-                         item['face_url'], item['face_height'], item['face_width']))
+                         item['score'], item['life'], item['last_login_time'], item['last_login_ip'],
+                         item['last_login_site'], item['country_cn'], item['country_en'], item['province'],
+                         item['last_login_bupt'], item['status'], item['face_url'], item['face_height'], item['face_width']))

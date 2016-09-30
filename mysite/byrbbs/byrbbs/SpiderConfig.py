@@ -15,8 +15,11 @@ class SpiderConfig(object):
     account_id = None
     account_passwd = None
 
-    def __init__(self):
-        pass
+    # 爬虫类型
+    spider_type = None
+
+    def __init__(self, spider_type):
+        self.spider_type = spider_type
 
     @staticmethod
     def initialize():

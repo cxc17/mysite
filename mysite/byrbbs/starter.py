@@ -11,6 +11,7 @@ from byrbbs.spiders.updatespider import UpdateSpider
 from byrbbs.spiders.allspider import AllSpider
 from byrbbs.spiders.userspider import UserSpider
 from byrbbs.spiders.userupdate import UserUpdateSpider
+from byrbbs.SpiderConfig import SpiderConfig
 
 
 if __name__ == '__main__':
@@ -18,12 +19,16 @@ if __name__ == '__main__':
 
     if spider_name == 'updatespider':
         spider = UpdateSpider()
+        SpiderConfig('updatespider').initialize()
     elif spider_name == 'allspider':
         spider = AllSpider()
+        SpiderConfig('allspider').initialize()
     elif spider_name == 'userspider':
         spider = UserSpider()
+        SpiderConfig('userspider').initialize()
     elif spider_name == 'userupdate':
         spider = UserUpdateSpider()
+        SpiderConfig('userupdate').initialize()
     else:
         print '输入参数有误！'
         exit(1)
