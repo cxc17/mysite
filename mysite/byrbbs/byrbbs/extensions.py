@@ -2,11 +2,13 @@
 
 from scrapy import signals
 from scrapy.exceptions import NotConfigured
+from lxml import etree
 import re
 import requests
 import json
 
 from SpiderConfig import SpiderConfig
+from byrbbs.mysqlclient import get_mysql
 
 
 class SpiderOpenCloseLogging(object):
@@ -35,7 +37,24 @@ class SpiderOpenCloseLogging(object):
     @staticmethod
     def deal_login_site():
         # 处理taobao接口新获取的ip
+        # 未分配IP
         pass
+
+        # 使用http://ip.zxinc.org/查找剩余IP
+        mh = get_mysql()
+        sql = "select id, last_login_ip from user where `last_login_site`=''"
+        ret_info = mh.select(sql)
+
+        for ret in ret_info:
+            last_login_ip = ret[1].replace("*", "0")
+            url = "hhttp://ip.zxinc.org/ipquery/?ip=%s" % last_login_ip
+            req = requests.get(url)
+            html = etree.HTML(req.content)
+            last_login_site = html.xpath("/html/body/center/div/form[1]/table/tr[4]/td[2]/text()")[0].split(' ')[0]
+
+            sql = "update "
+
+
 
     @staticmethod
     def last_login(last_login_ip):

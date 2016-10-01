@@ -19,7 +19,7 @@ class SpiderConfig(object):
     spider_type = None
 
     def __init__(self, spider_type):
-        self.spider_type = spider_type
+        SpiderConfig.spider_type = spider_type
 
     @staticmethod
     def initialize():

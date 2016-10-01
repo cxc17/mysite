@@ -185,14 +185,18 @@ class UserUpdateSpider(Spider):
         mh = get_mysql()
         ret_sql = mh.select(sql)
         # 判断是否是数据库中存在的ip地址
-        if ret_sql[0]:
-            return ret_sql[0][1], ret_sql[0][2], ret_sql[0][3], ret_sql[0][4], ret_sql[0][5]
+        if ret_sql:
+            return ret_sql[0][1], ret_sql[0][2], ret_sql[0][3], ret_sql[0][4], ""
 
         # 使用taobao的ip接口完成获取地址
         last_login_ip = last_login_ip.replace("*", "0")
         url = "http://ip.taobao.com/service/getIpInfo.php?ip=%s" % last_login_ip
-        req = requests.get(url)
-        ip_content = json.loads(req.content)
+
+        try:
+            req = requests.get(url)
+            ip_content = json.loads(req.content)
+        except:
+            return "", "", "", "", ""
 
         if ip_content['code'] == -1 or ip_content['code'] == 1:
             return "", "", "", "", ""

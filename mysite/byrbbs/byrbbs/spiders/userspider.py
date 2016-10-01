@@ -32,27 +32,28 @@ class UserSpider(Spider):
                             headers={'X-Requested-With': 'XMLHttpRequest'})]
 
     def logged_in(self, response):
+        return
         login_info = json.loads(response.body.decode('gbk'))
 
         if login_info['ajax_msg'] != u'操作成功':
             print 'ERROR!!!'
             return
 
-        # 删除user_id里原有的数据
-        sql = "DELETE FROM user_id"
-        mh = get_mysql()
-        mh.execute(sql)
+        # # 删除user_id里原有的数据
+        # sql = "DELETE FROM user_id"
+        # mh = get_mysql()
+        # mh.execute(sql)
 
-        # 从comment中提取用户id数据到user_id表中
-        sql = "INSERT into user_id  (`user_id`) SELECT DISTINCT `user_id` from `comment`"
-        mh = get_mysql()
-        mh.execute(sql)
-
-        # 从post中提取用户id数据到user_id表中
-        sql = "INSERT into user_id  (`user_id`) SELECT DISTINCT `user_id` from post WHERE user_id not in " \
-              "(SELECT DISTINCT `user_id` from `comment`)"
-        mh = get_mysql()
-        mh.execute(sql)
+        # # 从comment中提取用户id数据到user_id表中
+        # sql = "INSERT into user_id  (`user_id`) SELECT DISTINCT `user_id` from `comment`"
+        # mh = get_mysql()
+        # mh.execute(sql)
+        #
+        # # 从post中提取用户id数据到user_id表中
+        # sql = "INSERT into user_id  (`user_id`) SELECT DISTINCT `user_id` from post WHERE user_id not in " \
+        #       "(SELECT DISTINCT `user_id` from `comment`)"
+        # mh = get_mysql()
+        # mh.execute(sql)
 
         # 删除user里原有的数据
         sql = "DELETE FROM user"
@@ -201,13 +202,14 @@ class UserSpider(Spider):
         ret_sql = mh.select(sql)
         # 判断是否是数据库中存在的ip地址
         if ret_sql:
-            return ret_sql[0][1], ret_sql[0][2], ret_sql[0][3], ret_sql[0][4], ret_sql[0][5]
+            return ret_sql[0][1], ret_sql[0][2], ret_sql[0][3], ret_sql[0][4], ""
 
         # 使用taobao的ip接口完成获取地址
         last_login_ip = last_login_ip.replace("*", "0")
         url = "http://ip.taobao.com/service/getIpInfo.php?ip=%s" % last_login_ip
-        req = requests.get(url)
+
         try:
+            req = requests.get(url)
             ip_content = json.loads(req.content)
         except:
             return "", "", "", "", ""
