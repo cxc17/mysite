@@ -3,7 +3,6 @@
 from scrapy import Spider
 from scrapy import FormRequest
 from scrapy import Request
-from scrapy.selector import Selector
 from time import strftime, localtime
 import requests
 import json
