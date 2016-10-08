@@ -39,7 +39,7 @@ class DealData(object):
         mh.execute(sql)
 
     @staticmethod
-    # 统计ip地址
+    # 统计全国各地区用户数
     def user_number_china():
         mh = get_mysql()
         sql = "select gender, province from user where province!=''"
@@ -68,7 +68,36 @@ class DealData(object):
         sql = "insert into data(`data_name`, `data_value`) values ('china', '%s')" % china
         mh.execute(sql)
 
+    @staticmethod
+    # 统计全世界各地区用户数
+    def user_number_world():
+        mh = get_mysql()
+        sql = "select gender, country_en from user where country_en!=''"
+        ret_info = mh.select(sql)
+
+        world = defaultdict(int)
+        for ret in ret_info:
+            world[ret[0]] += 1
+
+        world = {u'女生': defaultdict(int), u'男生': defaultdict(int), u'全部': defaultdict(int)}
+        for ret in ret_info:
+            if ret[0] == u'女生':
+                world[u'女生'][ret[1]] += 1
+                world[u'全部'][ret[1]] += 1
+            elif ret[0] == u'男生':
+                world[u'男生'][ret[1]] += 1
+                world[u'全部'][ret[1]] += 1
+            else:
+                world[u'全部'][ret[1]] += 1
+
+        world = json.dumps(world, ensure_ascii=False)
+
+        sql = "delete from data where `data_name`='world'"
+        mh.execute(sql)
+
+        sql = "insert into data(`data_name`, `data_value`) values ('world', '%s')" % world
+        mh.execute(sql)
 
 if __name__ == '__main__':
-    DealData().user_number_china()
+    DealData().user_number_world()
 
