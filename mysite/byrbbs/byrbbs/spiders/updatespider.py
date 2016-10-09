@@ -39,15 +39,13 @@ class UpdateSpider(Spider):
         if login_info['ajax_msg'] != u'操作成功':
             print 'ERROR!!!'
             return
-
+        mh = get_mysql()
         # 清除user_id中的数据
         sql = "delete from user_id"
-        mh = get_mysql()
         mh.execute(sql)
 
         # 从数据库中找出每个版块的名称
         sql = "select board_name from board"
-        mh = get_mysql()
         ret_sql = mh.select(sql)
 
         for ret in ret_sql:
@@ -133,13 +131,12 @@ class UpdateSpider(Spider):
             print post_url
             post_url = 'https://bbs.byr.cn' + post_url
 
+            mh = get_mysql()
             # 删除更新的原贴和评论
             sql = "DELETE FROM comment WHERE `post_id`=(SELECT `post_id` FROM post WHERE `url`='%s')" % post_url
-            mh = get_mysql()
             mh.execute(sql)
 
             sql = "DELETE FROM post WHERE `url`='%s'" % post_url
-            mh = get_mysql()
             mh.execute(sql)
 
             yield Request(post_url,
@@ -261,6 +258,10 @@ class UpdateSpider(Spider):
             except:
                 item['post_num'] = '0'
                 item['post_time'] = response.meta['last_time']
+                # 增加新的user_id
+                sql = "insert into user_id(`user_id`) values('%s')" % item['author_id']
+                mh = get_mysql()
+                mh.execute(sql)
                 yield item
                 return
 
@@ -397,15 +398,27 @@ class UpdateSpider(Spider):
             # 帖子题目
             item_comment['post_title'] = item['post_title']
 
+            # 增加新的user_id
+            sql = "insert into user_id(`user_id`) values('%s')" % item_comment['commenter_id']
+            mh = get_mysql()
+            mh.execute(sql)
             yield item_comment
 
         # 判断一共有多少页评论
         post_num = int(item['post_num']) + 1
         if post_num == 1:
             item['last_time'] = item['post_time']
+            # 增加新的user_id
+            sql = "insert into user_id(`user_id`) values('%s')" % item['author_id']
+            mh = get_mysql()
+            mh.execute(sql)
             yield item
             return
         elif post_num <= 10:
+            # 增加新的user_id
+            sql = "insert into user_id(`user_id`) values('%s')" % item['author_id']
+            mh = get_mysql()
+            mh.execute(sql)
             yield item
             return
         elif post_num % 10 == 0:
@@ -459,8 +472,11 @@ class UpdateSpider(Spider):
                         item['commenter_id'] = sel.xpath(CommenterId_xpath).extract()[0]
                     except:
                         if response.meta['post_page'] == response.meta['now_page']:
+                            # 增加新的user_id
+                            sql = "insert into user_id(`user_id`) values('%s')" % post_item['author_id']
+                            mh = get_mysql()
+                            mh.execute(sql)
                             yield post_item
-
                         return
 
                 CommenterName_xpath = '/html/body/div[3]/div[%s]/table/tr[2]/td[1]/div[2]/text()' % num
@@ -549,7 +565,15 @@ class UpdateSpider(Spider):
             # 帖子题目
             item['post_title'] = response.meta['post_title']
 
+            # 增加新的user_id
+            sql = "insert into user_id(`user_id`) values('%s')" % item['commenter_id']
+            mh = get_mysql()
+            mh.execute(sql)
             yield item
 
         if response.meta['post_page'] == response.meta['now_page']:
+            # 增加新的user_id
+            sql = "insert into user_id(`user_id`) values('%s')" % post_item['author_id']
+            mh = get_mysql()
+            mh.execute(sql)
             yield post_item

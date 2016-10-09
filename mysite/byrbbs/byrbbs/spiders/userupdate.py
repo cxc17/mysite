@@ -38,7 +38,7 @@ class UserUpdateSpider(Spider):
             print 'ERROR!!!'
             return
 
-        # 从数据库中找出每个版块的名称
+        # 从数据库中找出user_id
         sql = "select distinct user_id from user_id"
         mh = get_mysql()
         ret_sql = mh.select(sql)
@@ -103,21 +103,19 @@ class UserUpdateSpider(Spider):
         except:
             item['status'] = u"目前不在站上"
 
+        mh = get_mysql()
         # 获取用户post数目
         sql = "select count(*) from post where `user_id`='%s'" % user_info['id']
-        mh = get_mysql()
         ret_sql = mh.select(sql)
         item['post_num'] = ret_sql[0][0]
 
         # 获取用户comment数目
         sql = "select count(*) from comment where `user_id`='%s'" % user_info['id']
-        mh = get_mysql()
         ret_sql = mh.select(sql)
         item['comment_num'] = ret_sql[0][0]
 
         # 删除user里原有的user数据
         sql = "DELETE FROM user WHERE `user_id` = '%s'" % user_info['id']
-        mh = get_mysql()
         mh.execute(sql)
 
         return item

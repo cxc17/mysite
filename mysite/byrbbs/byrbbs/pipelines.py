@@ -1,7 +1,7 @@
 # coding: utf-8
 
-import MySQLdb.cursors
 from twisted.enterprise import adbapi
+import MySQLdb.cursors
 import ConfigParser
 import os
 

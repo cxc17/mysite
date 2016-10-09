@@ -99,5 +99,5 @@ class DealData(object):
         mh.execute(sql)
 
 if __name__ == '__main__':
-    DealData().user_number_world()
+    DealData().user_number_china()
 

@@ -32,37 +32,31 @@ class UserSpider(Spider):
                             headers={'X-Requested-With': 'XMLHttpRequest'})]
 
     def logged_in(self, response):
-        return
         login_info = json.loads(response.body.decode('gbk'))
 
         if login_info['ajax_msg'] != u'操作成功':
             print 'ERROR!!!'
             return
-
+        mh = get_mysql()
         # 删除user_id里原有的数据
         sql = "DELETE FROM user_id"
-        mh = get_mysql()
         mh.execute(sql)
 
         # 从comment中提取用户id数据到user_id表中
         sql = "INSERT into user_id  (`user_id`) SELECT DISTINCT `user_id` from `comment`"
-        mh = get_mysql()
         mh.execute(sql)
 
         # 从post中提取用户id数据到user_id表中
         sql = "INSERT into user_id  (`user_id`) SELECT DISTINCT `user_id` from post WHERE user_id not in " \
               "(SELECT DISTINCT `user_id` from `comment`)"
-        mh = get_mysql()
         mh.execute(sql)
 
         # 删除user里原有的数据
         sql = "DELETE FROM user"
-        mh = get_mysql()
         mh.execute(sql)
 
-        # 从数据库中找出每个版块的名称
+        # 从数据库中找出user_id
         sql = "select distinct user_id from user_id"
-        mh = get_mysql()
         ret_sql = mh.select(sql)
 
         for ret in ret_sql:
@@ -125,15 +119,14 @@ class UserSpider(Spider):
         except:
             item['status'] = u"目前不在站上"
 
+        mh = get_mysql()
         # 获取用户post数目
         sql = "select count(*) from post where `user_id`='%s'" % user_info['id']
-        mh = get_mysql()
         ret_sql = mh.select(sql)
         item['post_num'] = ret_sql[0][0]
 
         # 获取用户comment数目
         sql = "select count(*) from comment where `user_id`='%s'" % user_info['id']
-        mh = get_mysql()
         ret_sql = mh.select(sql)
         item['comment_num'] = ret_sql[0][0]
 
