@@ -39,6 +39,36 @@ class DealData(object):
         mh.execute(sql)
 
     @staticmethod
+    # 统计北邮用户数
+    def user_number_bupt():
+        mh = get_mysql()
+        sql = "select gender, last_login_bupt from user where last_login_bupt!='' and last_login_bupt!='未知'"
+        ret_info = mh.select(sql)
+
+        bupt = defaultdict(int)
+        for ret in ret_info:
+            bupt[ret[0]] += 1
+
+        bupt = {u'女生': defaultdict(int), u'男生': defaultdict(int), u'全部': defaultdict(int)}
+        for ret in ret_info:
+            if ret[0] == u'女生':
+                bupt[u'女生'][ret[1]] += 1
+                bupt[u'全部'][ret[1]] += 1
+            elif ret[0] == u'男生':
+                bupt[u'男生'][ret[1]] += 1
+                bupt[u'全部'][ret[1]] += 1
+            else:
+                bupt[u'全部'][ret[1]] += 1
+
+        bupt = json.dumps(bupt, ensure_ascii=False)
+
+        sql = "delete from data where `data_name`='bupt'"
+        mh.execute(sql)
+
+        sql = "insert into data(`data_name`, `data_value`) values ('bupt', '%s')" % bupt
+        mh.execute(sql)
+
+    @staticmethod
     # 统计全国各地区用户数
     def user_number_china():
         mh = get_mysql()
@@ -99,5 +129,5 @@ class DealData(object):
         mh.execute(sql)
 
 if __name__ == '__main__':
-    DealData().user_number_china()
+    DealData().user_number_bupt()
 

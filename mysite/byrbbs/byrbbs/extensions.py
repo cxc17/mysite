@@ -84,7 +84,7 @@ class SpiderOpenCloseLogging(object):
             try:
                 country_en = country_map[ret[0]]
             except:
-                print "ERROR! site中不存在此国家:%s".decode("utf-8") % ret[0]
+                print "ERROR! site not exist country:%s" % ret[0]
                 continue
             sql = "insert into site(`site`, `country_cn`, `country_en`, `province`, `ip`) value " \
                   "('%s', '%s', '%s', '', '%s')" % (ret[0], ret[0], country_en, ret[1])
@@ -113,7 +113,7 @@ class SpiderOpenCloseLogging(object):
             try:
                 site_info = mh.select(sql)[0]
             except:
-                print "ERROR! site中不存在此ip:%s".decode("utf-8") % ret[1]
+                print "ERROR! site not exist ip:%s" % ret[1]
                 continue
 
             sql = "update user set `country_cn`='%s', `country_en`='%s', `province`='%s' where id='%s'" % (site_info[0], site_info[1], site_info[2], ret[0])
