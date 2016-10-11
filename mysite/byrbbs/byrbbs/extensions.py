@@ -5,7 +5,6 @@ from scrapy.exceptions import NotConfigured
 from lxml import etree
 import re
 import requests
-import json
 
 from SpiderConfig import SpiderConfig
 from byrbbs.mysqlclient import get_mysql

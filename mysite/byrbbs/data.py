@@ -5,6 +5,7 @@ from byrbbs.mysqlclient import get_mysql
 
 from collections import defaultdict
 import json
+import datetime
 
 
 class DealData(object):
@@ -128,6 +129,178 @@ class DealData(object):
         sql = "insert into data(`data_name`, `data_value`) values ('world', '%s')" % world
         mh.execute(sql)
 
+    @staticmethod
+    # 统计用户发帖时间分布
+    def post_time():
+        mh = get_mysql()
+        sql = "select post.publish_time, user.gender from post left join user on post.user_id=user.user_id " \
+              "ORDER by `publish_time`"
+        ret_info = mh.select(sql)
+
+        count = 0
+        post_date_num = [0]
+        post_date = ["2004/05/28"]
+        post_year_num = {u'女生': [0]*13, u'男生': [0]*13, u'全部': [0]*13}
+        post_month_num = {u'女生': [0]*12, u'男生': [0]*12, u'全部': [0]*12}
+        post_day_num = {u'女生': [0]*31, u'男生': [0]*31, u'全部': [0]*31}
+        post_weekday_num = {u'女生': [0]*7, u'男生': [0]*7, u'全部': [0]*7}
+        post_hour_num = {u'女生': [0]*24, u'男生': [0]*24, u'全部': [0]*24}
+        for ret in ret_info:
+            cdatetime = ret[0]
+            cdate = str(cdatetime.date()).replace("-", "/")
+            cyear = cdatetime.year-2004
+            cmonth = cdatetime.month-1
+            cday = cdatetime.day-1
+            cweekday = cdatetime.weekday()
+            chour = cdatetime.hour
+
+            # 日期
+            if cdate == post_date[count]:
+                post_date_num[count] += 1
+            else:
+                post_date.append(cdate)
+                post_date_num.append(1)
+                count += 1
+
+            if ret[1] == u'女生':
+                post_year_num[u'女生'][cyear] += 1
+                post_year_num[u'全部'][cyear] += 1
+                post_month_num[u'女生'][cmonth] += 1
+                post_month_num[u'全部'][cmonth] += 1
+                post_day_num[u'女生'][cday] += 1
+                post_day_num[u'全部'][cday] += 1
+                post_weekday_num[u'女生'][cweekday] += 1
+                post_weekday_num[u'全部'][cweekday] += 1
+                post_hour_num[u'女生'][chour] += 1
+                post_hour_num[u'全部'][chour] += 1
+            elif ret[1] == u'男生':
+                post_year_num[u'男生'][cyear] += 1
+                post_year_num[u'全部'][cyear] += 1
+                post_month_num[u'男生'][cmonth] += 1
+                post_month_num[u'全部'][cmonth] += 1
+                post_day_num[u'男生'][cday] += 1
+                post_day_num[u'全部'][cday] += 1
+                post_weekday_num[u'男生'][cweekday] += 1
+                post_weekday_num[u'全部'][cweekday] += 1
+                post_hour_num[u'男生'][chour] += 1
+                post_hour_num[u'全部'][chour] += 1
+            else:
+                post_year_num[u'全部'][cyear] += 1
+                post_month_num[u'全部'][cmonth] += 1
+                post_day_num[u'全部'][chour] += 1
+                post_weekday_num[u'全部'][cweekday] += 1
+                post_hour_num[u'全部'][chour] += 1
+
+        post = {'post_date': post_date, 'post_date_num': post_date_num, "post_year_num": post_year_num,
+                "post_month_num": post_month_num, "post_day_num": post_day_num, "post_weekday_num": post_weekday_num,
+                "post_hour_num": post_hour_num}
+        post = json.dumps(post, ensure_ascii=False)
+
+        sql = "delete from data where `data_name`='post'"
+        mh.execute(sql)
+
+        sql = "insert into data(`data_name`, `data_value`) values ('post', '%s')" % post
+        mh.execute(sql)
+
+    @staticmethod
+    # 统计用户跟帖时间分布
+    def comment_time():
+        mh = get_mysql()
+        sql = "select comment.publish_time, user.gender from comment left join user on comment.user_id=user.user_id " \
+              "ORDER by `publish_time`"
+        ret_info = mh.select(sql)
+
+        count = 0
+        comment_date_num = [0]
+        comment_date = ["2004/05/28"]
+        comment_year_num = {u'女生': [0]*13, u'男生': [0]*13, u'全部': [0]*13}
+        comment_month_num = {u'女生': [0]*12, u'男生': [0]*12, u'全部': [0]*12}
+        comment_day_num = {u'女生': [0]*31, u'男生': [0]*31, u'全部': [0]*31}
+        comment_weekday_num = {u'女生': [0]*7, u'男生': [0]*7, u'全部': [0]*7}
+        comment_hour_num = {u'女生': [0]*24, u'男生': [0]*24, u'全部': [0]*24}
+        for ret in ret_info:
+            cdatetime = ret[0]
+            cdate = str(cdatetime.date()).replace("-", "/")
+            cyear = cdatetime.year-2004
+            cmonth = cdatetime.month-1
+            cday = cdatetime.day-1
+            cweekday = cdatetime.weekday()
+            chour = cdatetime.hour
+
+            # 日期
+            if cdate == comment_date[count]:
+                comment_date_num[count] += 1
+            else:
+                comment_date.append(cdate)
+                comment_date_num.append(1)
+                count += 1
+
+            if ret[1] == u'女生':
+                comment_year_num[u'女生'][cyear] += 1
+                comment_year_num[u'全部'][cyear] += 1
+                comment_month_num[u'女生'][cmonth] += 1
+                comment_month_num[u'全部'][cmonth] += 1
+                comment_day_num[u'女生'][cday] += 1
+                comment_day_num[u'全部'][cday] += 1
+                comment_weekday_num[u'女生'][cweekday] += 1
+                comment_weekday_num[u'全部'][cweekday] += 1
+                comment_hour_num[u'女生'][chour] += 1
+                comment_hour_num[u'全部'][chour] += 1
+            elif ret[1] == u'男生':
+                comment_year_num[u'男生'][cyear] += 1
+                comment_year_num[u'全部'][cyear] += 1
+                comment_month_num[u'男生'][cmonth] += 1
+                comment_month_num[u'全部'][cmonth] += 1
+                comment_day_num[u'男生'][cday] += 1
+                comment_day_num[u'全部'][cday] += 1
+                comment_weekday_num[u'男生'][cweekday] += 1
+                comment_weekday_num[u'全部'][cweekday] += 1
+                comment_hour_num[u'男生'][chour] += 1
+                comment_hour_num[u'全部'][chour] += 1
+            else:
+                comment_year_num[u'全部'][cyear] += 1
+                comment_month_num[u'全部'][cmonth] += 1
+                comment_day_num[u'全部'][chour] += 1
+                comment_weekday_num[u'全部'][cweekday] += 1
+                comment_hour_num[u'全部'][chour] += 1
+
+        comment = {'comment_date': comment_date, 'comment_date_num': comment_date_num,
+                   "comment_year_num": comment_year_num, "comment_month_num": comment_month_num,
+                   "comment_day_num": comment_day_num, "comment_weekday_num": comment_weekday_num,
+                   "comment_hour_num": comment_hour_num}
+        comment = json.dumps(comment, ensure_ascii=False)
+
+        sql = "delete from data where `data_name`='comment'"
+        mh.execute(sql)
+
+        sql = "insert into data(`data_name`, `data_value`) values ('comment', '%s')" % comment
+        mh.execute(sql)
+
 if __name__ == '__main__':
-    DealData().user_number_bupt()
+    DealData().comment_time()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
