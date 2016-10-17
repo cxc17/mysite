@@ -39,7 +39,8 @@ class UserUpdateSpider(Spider):
             return
 
         # 从数据库中找出user_id
-        sql = "select distinct user_id from user_id"
+        # select DISTINCT(user_id) from user_id where user_id not in (select user_id from user_id_exit)
+        sql = "select distinct user_id from user_id where user_id not in (select user_id from user_id_exit)"
         mh = get_mysql()
         ret_sql = mh.select(sql)
 
