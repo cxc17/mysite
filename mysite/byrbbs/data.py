@@ -277,20 +277,23 @@ class DealData(object):
         mh.execute(sql)
 
 if __name__ == '__main__':
+    # 统计星座信息
+    DealData().astro()
+
+    # 统计北邮用户数
+    DealData().user_number_bupt()
+
+    # 统计全国各地区用户数
+    DealData().user_number_china()
+
+    # 统计全世界各地区用户数
+    DealData().user_number_world()
+
+    # 统计用户发帖时间分布
+    DealData().post_time()
+
+    # 统计用户跟帖时间分布
     DealData().comment_time()
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
