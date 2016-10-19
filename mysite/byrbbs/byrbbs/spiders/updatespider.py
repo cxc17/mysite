@@ -58,7 +58,7 @@ class UpdateSpider(Spider):
 
     # 爬取每个版块的帖子的页数
     def board_page(self, response):
-        sel = Selector(response)
+        # sel = Selector(response)
 
         sql = "SELECT `last_time` FROM post WHERE `board_name`='%s' " \
               "ORDER BY `last_time` DESC LIMIT 1" % response.meta['board_name']
@@ -72,21 +72,21 @@ class UpdateSpider(Spider):
             time_tmp = strptime(last_time, "%Y-%m-%d %H:%M:%S")
             cmp_time = int(mktime(time_tmp))
 
-        # 更新时间范围为一周的帖子，604800秒等于一周, 259200秒等于3天
+        # 更新时间范围为一周的帖子，604800秒等于一周, 172800秒等于2天
         now_time = int(time())
-        if cmp_time+259200 < now_time:
+        if cmp_time+172800 < now_time:
             cmp_time = now_time
 
-        PostNum_xpath = '/html/body/div[4]/div[1]/ul/li[1]/i/text()'
-        post_num = int(sel.xpath(PostNum_xpath).extract()[0])
-
-        if post_num % 30 == 0:
-            post_page = post_num / 30 + 1
-        else:
-            post_page = post_num / 30 + 2
+        # PostNum_xpath = '/html/body/div[4]/div[1]/ul/li[1]/i/text()'
+        # post_num = int(sel.xpath(PostNum_xpath).extract()[0])
+        #
+        # if post_num % 30 == 0:
+        #     post_page = post_num / 30 + 1
+        # else:
+        #     post_page = post_num / 30 + 2
 
         # 增量更新需要爬取的页数
-        for num in xrange(1, 4):  # post_page):
+        for num in xrange(1, 3):  # post_page):
             page_url = 'https://bbs.byr.cn/board/%s?p=%s' % (response.meta['board_name'], num)
 
             yield Request(page_url,

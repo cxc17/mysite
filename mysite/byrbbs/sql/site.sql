@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50173
 File Encoding         : 65001
 
-Date: 2016-10-17 17:51:10
+Date: 2016-10-19 10:10:57
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -27,7 +27,7 @@ CREATE TABLE `site` (
   `province` varchar(50) DEFAULT NULL,
   `ip` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=28284 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=28291 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of site
@@ -28194,3 +28194,10 @@ INSERT INTO `site` VALUES ('28280', '北京市', '中国', 'China', '北京', '1
 INSERT INTO `site` VALUES ('28281', '北京市', '中国', 'China', '北京', '222.128.199.*');
 INSERT INTO `site` VALUES ('28282', '北京市', '中国', 'China', '北京', '61.51.81.*');
 INSERT INTO `site` VALUES ('28283', '湖北省', '中国', 'China', '湖北', '221.235.129.*');
+INSERT INTO `site` VALUES ('28284', '四川省', '中国', 'China', '四川', '182.148.114.*');
+INSERT INTO `site` VALUES ('28285', '北京市', '中国', 'China', '北京', '111.132.218.*');
+INSERT INTO `site` VALUES ('28286', '北京市', '中国', 'China', '北京', '222.131.117.*');
+INSERT INTO `site` VALUES ('28287', '四川省', '中国', 'China', '四川', '182.150.46.*');
+INSERT INTO `site` VALUES ('28288', '天津市', '中国', 'China', '天津', '211.81.52.*');
+INSERT INTO `site` VALUES ('28289', '安徽省', '中国', 'China', '安徽', '183.162.0.*');
+INSERT INTO `site` VALUES ('28290', '浙江省', '中国', 'China', '浙江', '183.157.9.*');

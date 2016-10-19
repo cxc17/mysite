@@ -38,25 +38,29 @@ class UserSpider(Spider):
             print 'ERROR!!!'
             return
         mh = get_mysql()
-        # 删除user_id里原有的数据
-        sql = "DELETE FROM user_id"
-        mh.execute(sql)
-
-        # 从comment中提取用户id数据到user_id表中
-        sql = "INSERT into user_id  (`user_id`) SELECT DISTINCT `user_id` from `comment`"
-        mh.execute(sql)
-
-        # 从post中提取用户id数据到user_id表中
-        sql = "INSERT into user_id  (`user_id`) SELECT DISTINCT `user_id` from post WHERE user_id not in " \
-              "(SELECT DISTINCT `user_id` from `comment`)"
-        mh.execute(sql)
-
-        # 删除user里原有的数据
-        sql = "DELETE FROM user"
-        mh.execute(sql)
+        # # 删除user_id里原有的数据
+        # sql = "DELETE FROM user_id"
+        # mh.execute(sql)
+        #
+        # # 从comment中提取用户id数据到user_id表中
+        # sql = "INSERT into user_id  (`user_id`) SELECT DISTINCT `user_id` from `comment`"
+        # mh.execute(sql)
+        #
+        # # 从post中提取用户id数据到user_id表中
+        # sql = "INSERT into user_id  (`user_id`) SELECT DISTINCT `user_id` from post WHERE user_id not in " \
+        #       "(SELECT DISTINCT `user_id` from `comment`)"
+        # mh.execute(sql)
+        #
+        # # 删除user里原有的数据
+        # sql = "DELETE FROM user"
+        # mh.execute(sql)
+        #
+        # # 从数据库中找出user_id
+        # sql = "select distinct user_id from user_id"
+        # ret_sql = mh.select(sql)
 
         # 从数据库中找出user_id
-        sql = "select distinct user_id from user_id"
+        sql = "select user_id from user order by insert_time limit 100"
         ret_sql = mh.select(sql)
 
         for ret in ret_sql:
@@ -129,6 +133,10 @@ class UserSpider(Spider):
         sql = "select count(*) from comment where `user_id`='%s'" % user_info['id']
         ret_sql = mh.select(sql)
         item['comment_num'] = ret_sql[0][0]
+
+        # 删除user里原有的user数据
+        sql = "DELETE FROM user WHERE `user_id` = '%s'" % user_info['id']
+        mh.execute(sql)
 
         return item
 

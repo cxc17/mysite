@@ -83,7 +83,8 @@ class SpiderOpenCloseLogging(object):
             try:
                 country_en = country_map[ret[0]]
             except:
-                print "ERROR! site not exist country:%s" % ret[0]
+                print "ERROR! site not exist country:",
+                print ret[0].encode("utf-8")
                 continue
             sql = "insert into site(`site`, `country_cn`, `country_en`, `province`, `ip`) value " \
                   "('%s', '%s', '%s', '', '%s')" % (ret[0], ret[0], country_en, ret[1])

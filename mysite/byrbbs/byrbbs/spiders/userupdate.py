@@ -38,19 +38,33 @@ class UserUpdateSpider(Spider):
             print 'ERROR!!!'
             return
 
-        # 从数据库中找出user_id
-        # select DISTINCT(user_id) from user_id where user_id not in (select user_id from user_id_exit)
-        sql = "select distinct user_id from user_id where user_id not in (select user_id from user_id_exit)"
         mh = get_mysql()
+        # 从数据库中找出user中不存在的user_id并保存
+        sql = "select distinct user_id from user_id where user_id not in (select user_id from user_id_exsit)"
         ret_sql = mh.select(sql)
 
+        sql = "insert into user_id_exsit (`user_id`) select distinct user_id from user_id where user_id not in " \
+              "(select user_id from user_id_exsit)"
+        mh.execute(sql)
+
         for ret in ret_sql:
+            if len(ret[0]) > 12:
+                continue
             user_id = ret[0]
             user_url = 'https://bbs.byr.cn/user/query/%s.json' % user_id
             yield Request(user_url,
                           meta={'cookiejar': response.meta['cookiejar']},
                           headers={'X-Requested-With': 'XMLHttpRequest'},
                           callback=self.user_info)
+        # 从数据库中找出user中存在的user_id
+        sql = "select distinct user_id from user_id where user_id in (select user_id from user_id_exsit)"
+        ret_sql = mh.select(sql)
+
+        for ret in ret_sql:
+            if len(ret[0]) > 12:
+                continue
+            user_id = ret[0]
+            yield self.deal_user_id(user_id)
 
     def user_info(self, response):
         try:
@@ -202,3 +216,19 @@ class UserUpdateSpider(Spider):
             return ip_content['data']['region'], "", "", "", ""
         else:
             return ip_content['data']['country'], "", "", "", ""
+
+    def deal_user_id(self, user_id):
+        mh = get_mysql()
+        # 获取用户post数目
+        sql = "select count(*) from post where `user_id`='%s'" % user_id
+        ret_sql = mh.select(sql)
+        post_num = ret_sql[0][0]
+
+        # 获取用户comment数目
+        sql = "select count(*) from comment where `user_id`='%s'" % user_id
+        ret_sql = mh.select(sql)
+        comment_num = ret_sql[0][0]
+
+        # 更新user中的数据
+        sql = "update user set post_num='%s', comment_num='%s' where user_id='%s'" % (post_num, comment_num, user_id)
+        mh.execute(sql)

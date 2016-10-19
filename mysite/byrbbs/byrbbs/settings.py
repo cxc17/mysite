@@ -2,7 +2,7 @@
 # Scrapy settings for byrbbs project
 from SpiderConfig import SpiderConfig
 
-# LOG_LEVEL = 'INFO'
+LOG_LEVEL = 'INFO'
 
 BOT_NAME = 'byrbbs'
 
