@@ -60,7 +60,8 @@ class SpiderOpenCloseLogging(object):
                 last_login_site = u'上海市'
             elif u'新疆'in last_login_site:
                 last_login_site = u'新疆维吾尔自治区'
-
+            elif u'广西'in last_login_site:
+                last_login_site = u'广西壮族自治区'
             sql = "update user set last_login_site='%s' where id='%s'" % (last_login_site, ret[0])
             mh.select(sql)
         # 统计ip到site中
