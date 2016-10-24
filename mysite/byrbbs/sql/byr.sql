@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50173
 File Encoding         : 65001
 
-Date: 2016-10-18 17:05:24
+Date: 2016-10-24 17:32:24
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -46,7 +46,7 @@ CREATE TABLE `comment` (
   KEY `user_id` (`user_id`) USING BTREE,
   KEY `user_name` (`user_name`) USING BTREE,
   KEY `publish_time` (`publish_time`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=10001259 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=19335324 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for data
@@ -59,21 +59,6 @@ CREATE TABLE `data` (
   `insert_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8;
-
--- ----------------------------
--- Table structure for num_bbs
--- ----------------------------
-DROP TABLE IF EXISTS `num_bbs`;
-CREATE TABLE `num_bbs` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_id` varchar(255) DEFAULT NULL,
-  `content` text,
-  `num` varchar(255) DEFAULT NULL,
-  `gender` varchar(255) DEFAULT NULL,
-  `url` varchar(255) DEFAULT NULL,
-  `inser_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4995 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for post
@@ -103,7 +88,21 @@ CREATE TABLE `post` (
   KEY `last_time` (`last_time`) USING BTREE,
   KEY `insert_time` (`insert_time`) USING BTREE,
   KEY `post_id` (`post_id`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=1000360 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=2209179 DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for post_index
+-- ----------------------------
+DROP TABLE IF EXISTS `post_index`;
+CREATE TABLE `post_index` (
+  `id` int(11) NOT NULL,
+  `word` varchar(255) NOT NULL,
+  `doc_fre` int(11) DEFAULT NULL,
+  `list` text,
+  PRIMARY KEY (`id`,`word`),
+  KEY `word` (`word`),
+  FULLTEXT KEY `list` (`list`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for site
@@ -117,7 +116,7 @@ CREATE TABLE `site` (
   `province` varchar(50) DEFAULT NULL,
   `ip` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=28291 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=28686 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for user
@@ -154,7 +153,7 @@ CREATE TABLE `user` (
   KEY `user_id` (`user_id`) USING BTREE,
   KEY `post_num` (`post_num`) USING BTREE,
   KEY `comment_num` (`comment_num`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=96392 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=109307 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for user_id
@@ -165,7 +164,7 @@ CREATE TABLE `user_id` (
   `user_id` varchar(255) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=11705098 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=19231322 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for user_id_exsit
@@ -176,4 +175,4 @@ CREATE TABLE `user_id_exsit` (
   `user_id` varchar(255) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=105199 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=107867 DEFAULT CHARSET=utf8;
