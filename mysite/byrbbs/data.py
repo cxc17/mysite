@@ -5,7 +5,6 @@ from byrbbs.mysqlclient import get_mysql
 
 from collections import defaultdict
 import json
-import datetime
 
 
 class DealData(object):

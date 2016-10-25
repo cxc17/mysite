@@ -62,6 +62,8 @@ class SpiderOpenCloseLogging(object):
                 last_login_site = u'新疆维吾尔自治区'
             elif u'广西'in last_login_site:
                 last_login_site = u'广西壮族自治区'
+            elif u'宁夏'in last_login_site:
+                last_login_site = u'宁夏回族自治区'
             sql = "update user set last_login_site='%s' where id='%s'" % (last_login_site, ret[0])
             mh.select(sql)
         # 统计ip到site中
@@ -98,7 +100,7 @@ class SpiderOpenCloseLogging(object):
         ret_info = mh.select(sql)
 
         for ret in ret_info:
-            province = ret[0].strip(u'市').strip(u'省').strip(u'自治区').strip(u'维吾尔自治区').strip(u'壮族自治区').strip(u'回族自治区')
+            province = ret[0].strip(u'市').strip(u'省').strip(u'维吾尔自治区').strip(u'壮族自治区').strip(u'回族自治区').strip(u'自治区')
             sql = "insert into site(`site`, `country_cn`, `country_en`, `province`, `ip`) value ('%s', '%s', 'China'," \
                   " '%s', '%s')" % (ret[0], u'中国', province, ret[1])
             mh.execute(sql)
