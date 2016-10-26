@@ -36,3 +36,17 @@ class get_mysql(object):
             # 数据库操作失败时回滚事务
             self.__conn.rollback()
             raise err
+
+    def query(self, sql):
+        try:
+            self.__cursor.execute(sql)
+        except Exception, err:
+            raise err
+
+    def selectone(self):
+        try:
+            result = self.__cursor.fetchone()
+        except Exception, err:
+            raise err
+
+        return result
