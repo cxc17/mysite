@@ -35,79 +35,29 @@ import collections
 
 
 class Solution(object):
-    def solveSudoku(self, board):
+    def countAndSay(self, n):
         """
-        :type board: List[List[str]]
-        :rtype: void Do not return anything, modify board in-place instead.
+        :type n: int
+        :rtype: str
         """
+        x = '1'
+        for j in xrange(n):
+            now = x[0]
+            tmp = 1
+            s = ''
+            for i in xrange(1, len(x)):
+                if x[i] == now:
+                    tmp += 1
+                else:
+                    s = s + str(tmp) + now
+                    now = x[i]
+                    tmp = 1
+            s = s + str(tmp) + now
+            x = s
+        return s
+
         
-        row = []
-        for i in xrange(9):
-            row.append(set())
-            for j in xrange(9):
-                if board[i][j] == '.':
-                    continue
-                row[i].add(board[i][j])
-
-        column = []
-        for i in xrange(9):
-            column.append(set())
-            for j in xrange(9):
-                if board[j][i] == '.':
-                    continue
-                column[i].add(board[j][i])
-
-        area = []
-        for i in xrange(9):
-            area.append(set())
-            for j in xrange(9):
-                if board[i/3*3+j/3][i%3*3+j%3] == '.':
-                    continue
-                area[i].add(board[i/3*3+j/3][i%3*3+j%3])
-        Solution().fun(row, column, area ,board, 0)
-
-    def fun(self, row, column, area ,board, n):
-        print n, board
-        if n == 81:
-            return True
-        i = n / 9
-        j = n % 9
-        if board[i][j] != '.':
-            if Solution().fun(row, column, area ,board, n+1):
-                return True
-            else:
-                return False
-        choose_num = row[i] & column[j] & area[i/3*3+j/3]
-        if not choose_num:
-            return False
-
-        for num in choose_num:
-            board[i][j] = num
-            row[i].remove(num)
-            column[j].remove(num)
-            area[i/3*3+j/3].remove(num)
-
-            if Solution().fun(row, column, area ,board, n+1):
-                return True
-
-            row[i].add(num)
-            column[j].add(num)
-            area[i/3*3+j/3].add(num)
-            board[i][j] = '.'
-
-a = [['.', '.', '9', '7', '4', '8', '.', '.', '.'], ['7', '.', '.', '.', '.', '.', '.', '.', '.'], ['.', '2', '.', '1', '.', '9', '.', '.', '.'], ['.', '.', '7', '.', '.', '.', '2', '4', '.'], ['.', '6', '4', '.', '1', '.', '5', '9', '.'], ['.', '9', '8', '.', '.', '.', '3', '.', '.'], ['.', '.', '.', '8', '.', '3', '.', '2', '.'], ['.', '.', '.', '.', '.', '.', '.', '.', '6'], ['.', '.', '.', '2', '7', '5', '9', '.', '.']]
-Solution().solveSudoku(a)
-print a
-
-# a = ["..9748...","7........",".2.1.9...","..7...24.",".64.1.59.",".98...3..","...8.3.2.","........6","...2759.."]
-# b = []
-# for i in xrange(9):
-#     b.append([])
-#     for j in a[i]:
-#         b[i].append(j)
-
-# print b
-
+print Solution().countAndSay(5)
 
 
 
