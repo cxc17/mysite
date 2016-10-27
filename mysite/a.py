@@ -34,31 +34,15 @@ import collections
 # print datetime.date.today() -  datetime.date.today()
 
 
-class Solution(object):
-    def countAndSay(self, n):
-        """
-        :type n: int
-        :rtype: str
-        """
-        x = '1'
-        for j in xrange(n):
-            now = x[0]
-            tmp = 1
-            s = ''
-            for i in xrange(1, len(x)):
-                if x[i] == now:
-                    tmp += 1
-                else:
-                    s = s + str(tmp) + now
-                    now = x[i]
-                    tmp = 1
-            s = s + str(tmp) + now
-            x = s
-        return s
+[database]
+host = 192.168.1.98
+db = byr
+user = root
+passwd = 123456
 
-        
-print Solution().countAndSay(5)
-
+[account_info]
+id = byrdata
+passwd = byrdata
 
 
 
