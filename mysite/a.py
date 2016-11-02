@@ -1,48 +1,77 @@
-# coding: utf-8
+# coding:utf-8
+# from lxml import etree
+# import re
+# import requests
+# import json
 
-import json
-import re
-import urllib, urllib2
-from lxml import etree
-import time
-import requests
+# url = "http://ip.zxinc.org/ipquery/?ip=130.225.198.0" 
+# req = requests.get(url)
+# html = etree.HTML(req.content)
+# last_login_site = html.xpath("/html/body/center/div/form[1]/table/tr[4]/td[2]/text()")[0].split(' ')[0]
+
+# print last_login_site
+
 import collections
+class Solution(object):
+    def letterCombinations(self, digits):
+        """
+        :type digits: str
+        :rtype: List[str]
+        """
+        if digits == "":
+            return []
+
+        a = {
+        '2': ['a', 'b', 'c'],
+        '3': ['d','e','f'],
+        '4': ['g','h','i'],
+        '5': ['j','k','l'],
+        '6': ['m','n','o'],
+        '7': ['p','q','r','s'],
+        '8': ['t','u','v'],
+        '9': ['w','x','y','z']
+        }
+
+        num = -1
+        while 1:
+            if len(digits) == 1:
+                return a[digits]
+
+            tmp = collections.defaultdict(int)
+            n_max = 0
+            s_max = ""
+            now = ""
+            for i in xrange(1, len(digits)):
+                if digits[i-1:i+1] == now:
+                    now = ""
+                else:
+                    tmp[digits[i-1:i+1]] += 1
+                    if tmp[digits[i-1:i+1]] > n_max:
+                        n_max = tmp[digits[i-1:i+1]] 
+                        s_max = digits[i-1:i+1]
+                    now = digits[i-1:i+1]
+
+            tmp0 = []
+            for i in a[s_max[0]]:
+                for j in a[s_max[1]]:
+                    tmp0.append(i+j)
+            a['0'] = tmp0
+
+            digits = digits.replace(s_max, "0")
 
 
-# a = urllib.urlopen("https://www.qcloud.com/act/campus#discount")
-# h = a.read().decode("utf-8")
-
-# print h
 
 
-# r = requests.get("http://www.1905.com/vod/play/1110697.shtml")
-
-# h = r.content
 
 
-# h = etree.HTML(h)
+print len(Solution().letterCombinations("2323232323"))
 
-# print h.xpath("//*[@id='playerBoxIntroCtx']/div[2]/ul/li[2]/span/a/text()")
-
-
-# post_time = localtime(mktime(strptime(post_time, "%a %b %d %H:%M:%S %Y")))
-# a = strftime('%Y-%m-%d %H:%M:%S', post_time)
+print 3**10
 
 
-# import datetime
-
-# print datetime.date.today() -  datetime.date.today()
 
 
-[database]
-host = 192.168.1.98
-db = byr
-user = root
-passwd = 123456
 
-[account_info]
-id = byrdata
-passwd = byrdata
 
 
 
