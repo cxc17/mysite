@@ -5,7 +5,7 @@ import sys
 
 def login():    
     # username = "2015140953"
-    # passwd = "2157687"
+    # passwd = ""
     username = raw_input("input username:")
     passwd = raw_input("input password:")
 
