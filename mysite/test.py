@@ -13,70 +13,231 @@
 
 
 import math
-
 import collections
 
 
 class Solution(object):
-    def canCompleteCircuit(self, gas, cost):
+    def longestIncreasingPath(self, matrix):
         """
-        :type gas: List[int]
-        :type cost: List[int]
+        :type matrix: List[List[int]]
         :rtype: int
         """
-        if sum(gas) < sum(cost):
-            return -1
-        tmp = 0
-        i = 0
-        y = 1
-        while i < len(gas):
-            x = max(y, 1)
-            print i, x, tmp
-            while x < len(gas):
-                j = (i+x)%len(gas)
-                tmp += gas[j]
-                tmp -= cost[j]
-                if tmp < 0:
-                    break
-                x += 1
-            print tmp
-            if x == len(gas):
-                return i
-            z = i
-            while tmp < 0 and z < x+i-1:
-                tmp -= gas[z]
-                tmp += cost[z]
-                z += 1
-            print tmp
-            i = z
-            y = x - i
-        return -1
+        if not matrix:
+            return 0
+        r_max = 1
+        for i in xrange(matrix):
+            for j in xrange(matrix[0]):
+                if i > 0 and matrix[i][j] >= matrix[i-1][j]:
+                    continue
+                if j > 0 and matrix[i][j] >= matrix[i][j-1]:
+                    continue
+                if i < len(matrix)-2 and matrix[i][j] >= matrix[i+1][j]:
+                    continue
+                if j < len(matrix[0])-2 and matrix[i][j] >= matrix[i][j+1]:
+                    continue
+                x1=x2=x3=x4=1
+                if i > 0:
+                    x1 = self.fun()
+                if j > 0:
+                    x1 = self.fun()
+                if i < len(matrix)-2:
+                    x1 = self.fun()
+                if i < len(matrix[0])-2:
+                    x1 = self.fun()
+
+                r_max = max(x1,x2,x3,x4)
+    def fun(self, tmp, i, j):
+                if i > 0:
+                    x1 = self.fun()
+                if j > 0:
+                    x1 = self.fun()
+                if i < len(matrix)-2:
+                    x1 = self.fun()
+                if i < len(matrix[0])-2:
+                    x1 = self.fun()
 
 
-print Solution().canCompleteCircuit([10,12,30,50],[20,30,40,12] )
+nums = [
+  [9,9,4],
+  [6,6,8],
+  [2,1,1]
+]
 
-# Single Number III   
-# Given an array of numbers nums, in which exactly two elements appear only once and all the other elements appear exactly twice.
-# Find the two elements that appear only once.
-
-# For example:
-
-# Given nums = [1, 2, 1, 3, 2, 5], return [3, 5].
-
-# Note:
-# The order of the result is not important. So in the above example, [5, 3] is also correct.
-# Your algorithm should run in linear runtime complexity. Could you implement it using only constant space complexity?
+# print Solution().longestIncreasingPath(nums)
 
 
 
+# Longest Increasing Path in a Matrix   
+# Given an integer matrix, find the length of the longest increasing path.
 
-# Gas Station   
-# There are N gas stations along a circular route, where the amount of gas at station i is gas[i].
+# From each cell, you can either move to four directions: left, right, up or down. 
+# You may NOT move diagonally or move outside of the boundary (i.e. wrap-around is not allowed).
 
-# You have a car with an unlimited gas tank and it costs cost[i] of gas to travel from station i
-#  to its next station (i+1). You begin the journey with an empty tank at one of the gas stations.
+# Example 1:
 
-# Return the starting gas station's index if you can travel around the circuit once, otherwise return -1.
+# nums = [
+#   [9,9,4],
+#   [6,6,8],
+#   [2,1,1]
+# ]
+# Return 4
+# The longest increasing path is [1, 2, 6, 9].
+
+# Example 2:
+
+# nums = [
+#   [3,4,5],
+#   [3,2,6],
+#   [2,2,1]
+# ]
+# Return 4
+# The longest increasing path is [3, 4, 5, 6]. Moving diagonally is not allowed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
