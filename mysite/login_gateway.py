@@ -3,12 +3,11 @@ import urllib
 import urllib2
 import sys
 
-def login():    
-    # username = "2015140953"
-    # passwd = ""
-    username = raw_input("input username:")
-    passwd = raw_input("input password:")
-
+def login():
+    # username = raw_input("input username:")
+    # passwd = raw_input("input password:")
+    username = "2015140462"
+    passwd = "wslg4123115"
     data={"DDDDD": username, 'upass': passwd, '0MKKey': ''}
     login_url = "http://10.3.8.211/" 
     data = urllib.urlencode(data)
