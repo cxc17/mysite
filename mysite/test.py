@@ -1,31 +1,18 @@
-# coding:utf-8
-# from lxml import etree
-# import re
-# import requests
-# import json
-# url = "http://10.3.8.211/" 
-# req = requests.get(url)
-
-# html = etree.HTML(req.content)
-# last_login_site = html.xpath("/html/body/center/div/form[1]/table/tr[4]/td[2]/text()")[0].split(' ')[0]
-
-# print req.content.decode("gbk")
+import tornado.ioloop
+import tornado.web
 
 
-import math
-import collections
+class MainHandler(tornado.web.RequestHandler):
+    def get(self):
+        self.write("Hello, world")
 
 
-class Solution(object):
-    def longestIncreasingPath(self, matrix):
-        """
-        :type matrix: List[List[int]]
-        :rtype: int
-        """
+def make_app():
+    return tornado.web.Application([
+        (r"/", MainHandler),
+    ])
 
-
-# print Solution().longestIncreasingPath(nums)
-
-
-
-
+if __name__ == "__main__":
+    app = make_app()
+    app.listen(8888)
+    tornado.ioloop.IOLoop.current().start()
