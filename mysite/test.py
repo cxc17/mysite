@@ -36,3 +36,7 @@ while 1:
     except:
         break
 
+import re
+a = a.split("\n")
+for s in a:
+    print  float(re.search(r"\((\d\.\d+)%\)", s).group(1))
