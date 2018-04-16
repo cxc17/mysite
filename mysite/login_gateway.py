@@ -7,7 +7,7 @@ def login():
     # username = raw_input("input username:")
     # passwd = raw_input("input password:")
     username = "2015140462"
-    passwd = "wslg4123115"
+    passwd = "******"
     data={"DDDDD": username, 'upass': passwd, '0MKKey': ''}
     login_url = "http://10.3.8.211/" 
     data = urllib.urlencode(data)
